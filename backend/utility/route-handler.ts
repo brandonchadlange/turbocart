@@ -15,11 +15,11 @@ interface RouteHandlerParams {
 
 export function RouteHandler(handlers: RouteHandlerParams) {
   return async (request: NextApiRequest, response: NextApiResponse) => {
-    await NextCors(request, response, {
-      methods: ["*"],
-      origin: request.headers.origin,
-      optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-    });
+    // await NextCors(request, response, {
+    //   methods: ["*"],
+    //   origin: request.headers.origin,
+    //   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    // });
 
     const method = request.method as HttpMethod;
     const handler = handlers[method];
