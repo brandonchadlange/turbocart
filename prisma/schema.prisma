@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  createdAt DateTime
+  basket    Basket[]
+  Student   Student[]
+}
+
+model User {
+  id           String @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String
+  passwordHash String
+}
+
+model Basket {
+  id        String  @id @default(cuid())
+  sessionId String
+  productId String
+  studentId String
+  menuId    String
+  dateId    String
+  quantity  Int
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id           String       @id
+  createdAt    DateTime
+  paymentId    String
+  quantity     Int          @default(0)
+  totalInCents Int          @default(0)
+  students     Int          @default(0)
+  items        OrderItem[]
+  detail       OrderDetail?
+}
+
+model OrderDetail {
+  id       String               @id @default(cuid())
+  orderId  String               @unique
+  menuId   String
+  order    Order                @relation(fields: [orderId], references: [id])
+  customer OrderDetailCustomer?
+  student  OrderDetailStudent?
+}
+
+model OrderDetailCustomer {
+  id            String      @id @default(cuid())
+  orderDetailId String      @unique()
+  firstName     String
+  lastName      String
+  grade         String
+  orderDetail   OrderDetail @relation(fields: [orderDetailId], references: [id])
+}
+
+model OrderDetailStudent {
+  id            String      @id @default(cuid())
+  orderDetailId String      @unique()
+  firstName     String
+  lastName      String
+  grade         String
+  orderDetail   OrderDetail @relation(fields: [orderDetailId], references: [id])
+}
+
+model OrderItem {
+  id                  String @id @default(cuid())
+  orderId             String
+  productId           String
+  dateId              String
+  menuId              String
+  quantity            Int
+  pricePerItemInCents Int
+  order               Order  @relation(fields: [orderId], references: [id])
+}
+
+model Student {
+  id        String   @id @default(cuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  firstName String
+  lastName  String
+  grade     String
+  basket    Basket[]
+}

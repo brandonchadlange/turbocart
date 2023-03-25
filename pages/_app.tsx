@@ -1,0 +1,30 @@
+import "@/styles/globals.css";
+import type { AppProps } from "next/app";
+import { MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
+import { QueryClient, QueryClientProvider } from "react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{
+          colorScheme: "light",
+        }}
+      >
+        <Notifications position="top-left" />
+        <Component {...pageProps} />
+      </MantineProvider>
+    </QueryClientProvider>
+  );
+}

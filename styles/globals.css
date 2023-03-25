@@ -1,0 +1,7 @@
+.menu-item {
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background-color: #fbfbfb;
+}
