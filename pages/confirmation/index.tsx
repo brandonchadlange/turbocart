@@ -40,6 +40,8 @@ const ConfirmationPage = () => {
   const basketSummary: BasketSummary = basketSummaryQuery.data || {
     totalInCents: 0,
     items: [],
+    totalItems: 0,
+    totalStudents: 0,
   };
 
   const basketDetail = basketDetailQuery.data || [];
