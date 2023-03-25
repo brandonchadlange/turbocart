@@ -74,20 +74,20 @@ export default function Home() {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const sessionId = getCookie("session", { req, res });
+// export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+//   const sessionId = getCookie("session", { req, res });
 
-  if (sessionId === undefined) {
-    const session = await dbInstance.session.create({
-      data: {
-        createdAt: new Date(),
-      },
-    });
+//   if (sessionId === undefined) {
+//     const session = await dbInstance.session.create({
+//       data: {
+//         createdAt: new Date(),
+//       },
+//     });
 
-    setCookie("session", session.id, { req, res });
-  }
+//     setCookie("session", session.id, { req, res });
+//   }
 
-  return {
-    props: {},
-  };
-};
+//   return {
+//     props: {},
+//   };
+// };
