@@ -12,7 +12,7 @@ datasource db {
 
 model Session {
   id         String    @id @default(cuid())
-  merchantId String    @default("")
+  merchantId String
   createdAt  DateTime
   basket     Basket[]
   Student    Student[]
