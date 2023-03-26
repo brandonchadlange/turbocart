@@ -87,7 +87,7 @@ export default RouteHandler({
     const newSession = await dbInstance.session.create({
       data: {
         createdAt: new Date(),
-        merchantId,
+        merchantId: merchantId,
       },
     });
 
