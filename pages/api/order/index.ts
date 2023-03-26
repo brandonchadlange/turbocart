@@ -14,6 +14,8 @@ export default RouteHandler({
   },
   async POST(req, res) {
     const sessionId = getCookie("session", { req, res })?.toString()!;
+    const host = req.headers.host!;
+    const merchantId = host.split(".")[0];
 
     const basketSummary = await getBasketSummary(sessionId, products);
 
@@ -85,6 +87,7 @@ export default RouteHandler({
     const newSession = await dbInstance.session.create({
       data: {
         createdAt: new Date(),
+        merchantId,
       },
     });
 
