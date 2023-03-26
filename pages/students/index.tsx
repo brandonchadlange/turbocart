@@ -64,7 +64,7 @@ const StudentsPage = () => {
   };
 
   return (
-    <AppShell header={<PageHeader />}>
+    <AppShell>
       <Steps active={0} />
       <main>
         <Flex justify="center">

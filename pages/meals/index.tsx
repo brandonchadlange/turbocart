@@ -1,5 +1,4 @@
 import MenuSelect, { useMenuSelect } from "@/components/menu-select";
-import PageHeader from "@/components/page-header";
 import Steps from "@/components/steps";
 import mutations from "@/frontend/utils/mutations";
 import queries from "@/frontend/utils/queries";
@@ -215,7 +214,7 @@ const MealsPage = () => {
   const confirmAndPayDisabled = basket.length === 0;
 
   return (
-    <AppShell header={<PageHeader />}>
+    <AppShell>
       <Steps active={1} />
       <main>
         <Flex justify="center">

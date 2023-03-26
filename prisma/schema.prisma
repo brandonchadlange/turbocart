@@ -11,10 +11,11 @@ datasource db {
 }
 
 model Session {
-  id        String    @id @default(cuid())
-  createdAt DateTime
-  basket    Basket[]
-  Student   Student[]
+  id         String    @id @default(cuid())
+  merchantId String    @default("")
+  createdAt  DateTime
+  basket     Basket[]
+  Student    Student[]
 }
 
 model User {

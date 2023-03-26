@@ -19,7 +19,7 @@ const hammerSmithOne = Hammersmith_One({
 
 const OrderSuccessPage = () => {
   return (
-    <AppShell header={<PageHeader />}>
+    <AppShell>
       <Stack align="center">
         <video height="300px" src="order-success.mp4" muted autoPlay loop />
         <Title className={hammerSmithOne.className}>Success!</Title>

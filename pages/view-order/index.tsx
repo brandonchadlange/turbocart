@@ -67,7 +67,7 @@ const ViewOrderPage = () => {
   };
 
   return (
-    <AppShell header={<PageHeader />}>
+    <AppShell>
       <Stack align="center" justify="stretch" mt={100}>
         {pageState === "loading" && <Loader />}
         {pageState === "capture" && (

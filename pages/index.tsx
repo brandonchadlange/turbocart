@@ -12,33 +12,15 @@ import {
 } from "@mantine/core";
 import { getCookie, setCookie } from "cookies-next";
 import { GetServerSideProps } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import WhiteLogo from "@/frontend/assets/logo-white.png";
-import { Hammersmith_One } from "next/font/google";
-
-const hammerSmithOne = Hammersmith_One({
-  weight: "400",
-  subsets: ["latin"],
-});
 
 export default function Home() {
   return (
     <AppShell padding={0}>
       <BackgroundImage src="banner.jpg" h="100vh">
         <Overlay>
-          <Stack align="stretch" justify="space-around" h="100%" px={60}>
-            <Flex justify="space-between">
-              <Flex gap="sm" w={1000} align="center">
-                <Image alt="logo" src={WhiteLogo} height={30} width={30} />
-                <Title
-                  className={hammerSmithOne.className}
-                  color="white"
-                  size={30}
-                >
-                  Brain Fuel
-                </Title>
-              </Flex>
+          <Stack align="stretch" justify="center" h="100%" px={60}>
+            <Flex justify="end">
               <Flex gap="md">
                 <Button color="yellow" variant="outline" radius="xl">
                   View order
@@ -76,12 +58,15 @@ export default function Home() {
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const sessionId = getCookie("session", { req, res });
+  const host = req.headers.host!;
+  const merchantId = host.split(".")[0];
 
   if (sessionId === undefined) {
     try {
       const session = await dbInstance.session.create({
         data: {
           createdAt: new Date(),
+          merchantId,
         },
       });
 
