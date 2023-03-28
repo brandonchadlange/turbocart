@@ -1,12 +1,17 @@
 import mutations from "@/frontend/utils/mutations";
 import queries from "@/frontend/utils/queries";
+import { studentFormSchema } from "@/frontend/utils/validation";
 import {
   ActionIcon,
   AppShell,
   Button,
   Card,
+  Container,
+  createStyles,
   Flex,
   Grid,
+  MediaQuery,
+  Modal,
   Select,
   Stack,
   Text,
@@ -18,19 +23,26 @@ import { Student } from "@prisma/client";
 import { IconTrash } from "@tabler/icons-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import Steps from "../../components/steps";
-import { studentFormSchema } from "@/frontend/utils/validation";
-import PageHeader from "@/components/page-header";
 
 type StudentForm = Omit<Student, "id" | "sessionId">;
 
-const StudentsPage = () => {
+const useStyles = createStyles((theme) => ({
+  container: {
+    width: "1000px",
+    // Dynamic media queries, define breakpoints in theme, use anywhere
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      width: "100%",
+    },
+  },
+}));
+
+const StudentFormComponent = ({ grades }: { grades: string[] }) => {
+  const queryClient = useQueryClient();
+  const { addStudent } = mutations;
   const firstNameRef = useRef<HTMLInputElement>(null);
   const [addStudentLoading, setAddStudentLoading] = useState(false);
-
-  const { fetchStudents, fetchGrades } = queries;
-  const { addStudent, removeStudent } = mutations;
 
   const form = useForm<StudentForm>({
     initialValues: {
@@ -41,6 +53,53 @@ const StudentsPage = () => {
     validate: zodResolver(studentFormSchema),
   });
 
+  const onFormSubmit = async (data: StudentForm) => {
+    setAddStudentLoading(true);
+    await addStudent(data.firstName, data.lastName, data.grade);
+    queryClient.refetchQueries("students");
+    form.reset();
+    firstNameRef.current?.focus();
+    setAddStudentLoading(false);
+  };
+
+  return (
+    <form onSubmit={form.onSubmit(onFormSubmit)}>
+      <Stack>
+        <TextInput
+          ref={firstNameRef}
+          {...form.getInputProps("firstName")}
+          label="First name"
+        />
+        <TextInput {...form.getInputProps("lastName")} label="Last name" />
+        <Select {...form.getInputProps("grade")} data={grades} label="Grade" />
+      </Stack>
+      <Flex mt={20}>
+        <Button type="submit" variant="default" loading={addStudentLoading}>
+          Add
+        </Button>
+      </Flex>
+    </form>
+  );
+};
+
+const StudentFormModal = ({ grades }: { grades: string[] }) => {
+  const [opened, setOpened] = useState(false);
+
+  return (
+    <>
+      <Button onClick={() => setOpened(true)}>Add student</Button>
+      <Modal opened={opened} onClose={() => setOpened(false)}>
+        <StudentFormComponent grades={grades} />
+      </Modal>
+    </>
+  );
+};
+
+const StudentsPage = () => {
+  const { fetchStudents, fetchGrades } = queries;
+  const { removeStudent } = mutations;
+  const { classes } = useStyles();
+
   const gradesQuery = useQuery("grades", fetchGrades);
   const studentsQuery = useQuery("students", fetchStudents);
 
@@ -49,15 +108,6 @@ const StudentsPage = () => {
 
   const continueDisabled = students.length === 0;
 
-  const onFormSubmit = async (data: StudentForm) => {
-    setAddStudentLoading(true);
-    await addStudent(data.firstName, data.lastName, data.grade);
-    await studentsQuery.refetch();
-    form.reset();
-    firstNameRef.current?.focus();
-    setAddStudentLoading(false);
-  };
-
   const promptToRemoveStudent = async (student: Student) => {
     await removeStudent(student.id);
     studentsQuery.refetch();
@@ -65,82 +115,59 @@ const StudentsPage = () => {
 
   return (
     <AppShell>
-      <Steps active={0} />
-      <main>
-        <Flex justify="center">
-          <Grid columns={2} w={1000} gutter="xl">
-            <Grid.Col span={2}>
-              <Title>Students</Title>
-              <Text>Add at least one student to continue</Text>
-            </Grid.Col>
-            <Grid.Col span={1}>
+      <Container mx="auto" className={classes.container} p={0}>
+        <Steps active={0} />
+        <Title>Students</Title>
+        <Text>Add at least one student to continue</Text>
+        <Grid columns={2} gutter="xl" mt="md">
+          <MediaQuery smallerThan="md" styles={{ display: "none" }}>
+            <Grid.Col md={1}>
               <Card withBorder style={{ overflow: "visible" }}>
-                <form onSubmit={form.onSubmit(onFormSubmit)}>
-                  <Stack>
-                    <TextInput
-                      ref={firstNameRef}
-                      {...form.getInputProps("firstName")}
-                      label="First name"
-                    />
-                    <TextInput
-                      {...form.getInputProps("lastName")}
-                      label="Last name"
-                    />
-                    <Select
-                      {...form.getInputProps("grade")}
-                      data={grades}
-                      label="Grade"
-                    />
-                  </Stack>
-                  <Flex mt={20}>
-                    <Button
-                      type="submit"
-                      variant="default"
-                      loading={addStudentLoading}
-                    >
-                      Add
-                    </Button>
-                  </Flex>
-                </form>
+                <StudentFormComponent grades={grades} />
               </Card>
             </Grid.Col>
-            <Grid.Col span={1}>
-              <Stack>
-                {students.map((student) => (
-                  <Card withBorder py="sm" key={student.id}>
-                    <Flex justify="space-between" align="center">
-                      <div>
-                        <Title size={16}>
-                          {student.firstName} {student.lastName}
-                        </Title>
-                        <Text size="xs">{student.grade}</Text>
-                      </div>
-                      <ActionIcon
-                        size="sm"
-                        onClick={() => promptToRemoveStudent(student)}
-                      >
-                        <IconTrash />
-                      </ActionIcon>
-                    </Flex>
-                  </Card>
-                ))}
-              </Stack>
+          </MediaQuery>
+          <Grid.Col md={1}>
+            <Stack>
+              {students.map((student) => (
+                <Card withBorder py="sm" key={student.id}>
+                  <Flex justify="space-between" align="center">
+                    <div>
+                      <Title size={16}>
+                        {student.firstName} {student.lastName}
+                      </Title>
+                      <Text size="xs">{student.grade}</Text>
+                    </div>
+                    <ActionIcon
+                      size="sm"
+                      onClick={() => promptToRemoveStudent(student)}
+                    >
+                      <IconTrash />
+                    </ActionIcon>
+                  </Flex>
+                </Card>
+              ))}
+            </Stack>
+          </Grid.Col>
+          <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+            <Grid.Col md={1}>
+              <Card withBorder style={{ overflow: "visible" }}>
+                <StudentFormComponent grades={grades} />
+              </Card>
             </Grid.Col>
-            <Grid.Col span={2}>
-              <Flex justify="end">
-                <Button
-                  disabled={continueDisabled}
-                  color="yellow"
-                  component={Link}
-                  href="/meals"
-                >
-                  Continue
-                </Button>
-              </Flex>
-            </Grid.Col>
-          </Grid>
+          </MediaQuery>
+        </Grid>
+        <Flex justify="end" mt="md">
+          <Button
+            disabled={continueDisabled}
+            color="yellow"
+            component={Link}
+            href="/meals"
+          >
+            Continue
+          </Button>
         </Flex>
-      </main>
+      </Container>
     </AppShell>
   );
 };

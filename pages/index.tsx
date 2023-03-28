@@ -16,39 +16,67 @@ import Link from "next/link";
 
 export default function Home() {
   return (
+    // <AppShell padding={0}>
+    //   <BackgroundImage src="banner.jpg" h="100vh">
+    //     <Overlay>
+    //       <Stack align="stretch" justify="center" h="100%" w="100%" px={60}>
+    //         <Flex justify="end">
+    //           <Flex gap="md">
+    //             <Button color="yellow" variant="outline" radius="xl">
+    //               View order
+    //             </Button>
+    //           </Flex>
+    //         </Flex>
+    //         <Card w={1000} bg="transparent" p={0}>
+    //           <Title color="white" size={80} style={{ lineHeight: "62px" }}>
+    //             Kids Lunch? <br />
+    //             <Text color="yellow">Sorted!</Text>
+    //           </Title>
+    //           <Text size={40} color="white" mt="lg" maw={500}>
+    //             Order your childrens meals up to two weeks in advance!
+    //           </Text>
+    //           <Flex gap="md" mt={40}>
+    //             <Button
+    //               component={Link}
+    //               href="/students"
+    //               w={180}
+    //               radius="xl"
+    //               color="yellow"
+    //               style={{ color: "black" }}
+    //               size="lg"
+    //             >
+    //               Place order
+    //             </Button>
+    //           </Flex>
+    //         </Card>
+    //       </Stack>
+    //     </Overlay>
+    //   </BackgroundImage>
+    // </AppShell>
     <AppShell padding={0}>
       <BackgroundImage src="banner.jpg" h="100vh">
         <Overlay>
-          <Stack align="stretch" justify="center" h="100%" px={60}>
-            <Flex justify="end">
-              <Flex gap="md">
-                <Button color="yellow" variant="outline" radius="xl">
-                  View order
-                </Button>
-              </Flex>
+          <Stack align="stretch" justify="center" h="100%" w="100%" px={30}>
+            <Title color="white" size={50} style={{ lineHeight: "62px" }}>
+              Kids Lunch? <br />
+              <Text color="yellow">Sorted!</Text>
+            </Title>
+            <Text size={20} color="white" mt="lg" maw={500}>
+              Order your childrens meals up to two weeks in advance!
+            </Text>
+            <Flex gap="md" mt={40}>
+              <Button
+                component={Link}
+                href="/students"
+                w={180}
+                radius="xl"
+                color="yellow"
+                style={{ color: "black" }}
+                size="lg"
+              >
+                Place order
+              </Button>
             </Flex>
-            <Card w={1000} bg="transparent" p={0}>
-              <Title color="white" size={80} style={{ lineHeight: "62px" }}>
-                Kids Lunch? <br />
-                <Text color="yellow">Sorted!</Text>
-              </Title>
-              <Text size={40} color="white" mt="lg" maw={500}>
-                Order your childrens meals up to two weeks in advance!
-              </Text>
-              <Flex gap="md" mt={40}>
-                <Button
-                  component={Link}
-                  href="/students"
-                  w={180}
-                  radius="xl"
-                  color="yellow"
-                  style={{ color: "black" }}
-                  size="lg"
-                >
-                  Place order
-                </Button>
-              </Flex>
-            </Card>
           </Stack>
         </Overlay>
       </BackgroundImage>

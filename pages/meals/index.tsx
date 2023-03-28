@@ -3,10 +3,12 @@ import Steps from "@/components/steps";
 import mutations from "@/frontend/utils/mutations";
 import queries from "@/frontend/utils/queries";
 import {
+  ActionIcon,
   AppShell,
   Button,
   Card,
   Checkbox,
+  Container,
   Divider,
   Drawer,
   Flex,
@@ -26,6 +28,8 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { Student } from "@prisma/client";
+import { IconArrowBack, IconArrowLeft } from "@tabler/icons-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
@@ -215,62 +219,70 @@ const MealsPage = () => {
 
   return (
     <AppShell>
-      <Steps active={1} />
-      <main>
-        <Flex justify="center">
-          <Grid columns={2} w={1000} gutter={0}>
-            <Grid.Col span={1} mb="sm">
-              <MenuSelect {...menuSelect} />
-            </Grid.Col>
-            <Grid.Col span={1} mb="sm">
-              <Flex justify="end" gap="sm">
-                <Button
-                  variant="default"
-                  onClick={() => setDetailsOpened(true)}
-                >
-                  Details
-                </Button>
-                <Button
-                  color="yellow"
-                  disabled={confirmAndPayDisabled}
-                  component={Link}
-                  href="/confirmation"
-                >
-                  Confirm & Pay
-                </Button>
-              </Flex>
-            </Grid.Col>
-            <Grid.Col span={2}>
-              <Space h={20} />
-              <Stack spacing="lg">
-                {menuSelect.selectedMenu?.categories.map((category) => (
-                  <div key={category.name}>
-                    <Title mb="xs" size={18}>
-                      {category.name}
-                    </Title>
-                    <Grid columns={3}>
-                      {category.items.map((item) => (
-                        <Grid.Col span={1} key={item.id}>
-                          <Card
-                            withBorder
-                            onClick={() => selectItem(item)}
-                            className="menu-item"
-                          >
-                            <Title size={14}>{item.name}</Title>
-                            <Text size="sm" color="dimmed">
-                              R{item.priceInCents / 100}
-                            </Text>
-                          </Card>
-                        </Grid.Col>
-                      ))}
-                    </Grid>
-                  </div>
-                ))}
-              </Stack>
-            </Grid.Col>
-          </Grid>
+      <Container mx="auto" p={0}>
+        <Flex align="center" gap="md">
+          <ActionIcon>
+            <IconArrowLeft />
+          </ActionIcon>
+          <Title>CBC Tuckshop</Title>
         </Flex>
-      </main>
+        <Steps active={1} />
+        <main>
+          <Flex justify="center">
+            <Grid columns={2} w={1000} gutter={0}>
+              <Grid.Col span={1} mb="sm">
+                <MenuSelect {...menuSelect} />
+              </Grid.Col>
+              <Grid.Col span={1} mb="sm">
+                <Flex justify="end" gap="sm">
+                  <Button
+                    variant="default"
+                    onClick={() => setDetailsOpened(true)}
+                  >
+                    Details
+                  </Button>
+                  <Button
+                    color="yellow"
+                    disabled={confirmAndPayDisabled}
+                    component={Link}
+                    href="/confirmation"
+                  >
+                    Confirm & Pay
+                  </Button>
+                </Flex>
+              </Grid.Col>
+              <Grid.Col span={2}>
+                <Space h={20} />
+                <Stack spacing="lg">
+                  {menuSelect.selectedMenu?.categories.map((category) => (
+                    <div key={category.name}>
+                      <Title mb="xs" size={18}>
+                        {category.name}
+                      </Title>
+                      <Grid columns={3}>
+                        {category.items.map((item) => (
+                          <Grid.Col span={1} key={item.id}>
+                            <Card
+                              withBorder
+                              onClick={() => selectItem(item)}
+                              className="menu-item"
+                            >
+                              <Title size={14}>{item.name}</Title>
+                              <Text size="sm" color="dimmed">
+                                R{item.priceInCents / 100}
+                              </Text>
+                            </Card>
+                          </Grid.Col>
+                        ))}
+                      </Grid>
+                    </div>
+                  ))}
+                </Stack>
+              </Grid.Col>
+            </Grid>
+          </Flex>
+        </main>
+      </Container>
       <Drawer
         size="sm"
         opened={drawerOpened}

@@ -10,6 +10,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Merchant {
+  id             String  @id
+  name           String
+  yocoPublicKey  String
+  yocoPrivateKey String
+  orders         Order[]
+}
+
 model Session {
   id         String    @id @default(cuid())
   merchantId String
@@ -41,10 +49,12 @@ model Basket {
 model Order {
   id           String       @id
   createdAt    DateTime
+  merchantId   String
   paymentId    String
   quantity     Int          @default(0)
   totalInCents Int          @default(0)
   students     Int          @default(0)
+  merchant     Merchant     @relation(fields: [merchantId], references: [id])
   items        OrderItem[]
   detail       OrderDetail?
 }
