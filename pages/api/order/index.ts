@@ -54,6 +54,8 @@ export default RouteHandler({
       },
     });
 
+    await captureMessage("Order created");
+
     const basketItems = await dbInstance.basket.findMany({
       where: {
         sessionId: sessionId,
@@ -83,6 +85,8 @@ export default RouteHandler({
 
     await Promise.all(basketItemMap);
 
+    await captureMessage("Added items to order");
+
     // Cleanup session
     await dbInstance.session.delete({
       where: {
@@ -90,12 +94,16 @@ export default RouteHandler({
       },
     });
 
+    await captureMessage("Deleted previous session");
+
     const newSession = await dbInstance.session.create({
       data: {
         createdAt: new Date(),
         merchantId: merchantId,
       },
     });
+
+    await captureMessage("Created new session");
 
     setCookie("session", newSession.id, { req, res });
     res.status(201).send("Order successfully created!");
