@@ -47,56 +47,44 @@ model Basket {
 }
 
 model Order {
-  id           String       @id
-  createdAt    DateTime
-  merchantId   String
-  paymentId    String
-  quantity     Int          @default(0)
-  totalInCents Int          @default(0)
-  students     Int          @default(0)
-  merchant     Merchant     @relation(fields: [merchantId], references: [id])
-  detail       OrderDetail?
-  items        OrderItem[]
+  id                String       @id
+  createdAt         DateTime
+  merchantId        String
+  paymentId         String
+  quantity          Int          @default(0)
+  totalInCents      Int          @default(0)
+  students          Int          @default(0)
+  customerFirstName String       @default("")
+  customerLastName  String       @default("")
+  customerEmail     String       @default("")
+  merchant          Merchant     @relation(fields: [merchantId], references: [id])
+  items             OrderItem[]
+  batches           OrderBatch[]
 
   @@index([merchantId], map: "Order_merchantId_fkey")
 }
 
-model OrderDetail {
-  id       String               @id @default(cuid())
-  orderId  String               @unique
-  menuId   String
-  order    Order                @relation(fields: [orderId], references: [id])
-  customer OrderDetailCustomer?
-  student  OrderDetailStudent?
-}
-
-model OrderDetailCustomer {
-  id            String      @id @default(cuid())
-  orderDetailId String      @unique
-  firstName     String
-  lastName      String
-  grade         String
-  orderDetail   OrderDetail @relation(fields: [orderDetailId], references: [id])
-}
-
-model OrderDetailStudent {
-  id            String      @id @default(cuid())
-  orderDetailId String      @unique
-  firstName     String
-  lastName      String
-  grade         String
-  orderDetail   OrderDetail @relation(fields: [orderDetailId], references: [id])
+model OrderBatch {
+  id               String      @id @default(cuid())
+  orderId          String
+  dateId           String
+  menuId           String
+  studentFirstName String
+  studentLastName  String
+  studentGrade     String
+  order            Order       @relation(fields: [orderId], references: [id])
+  items            OrderItem[]
 }
 
 model OrderItem {
-  id                  String @id @default(cuid())
+  id                  String     @id @default(cuid())
   orderId             String
+  orderBatchId        String
   productId           String
-  dateId              String
-  menuId              String
   quantity            Int
   pricePerItemInCents Int
-  order               Order  @relation(fields: [orderId], references: [id])
+  order               Order      @relation(fields: [orderId], references: [id])
+  batch               OrderBatch @relation(fields: [orderBatchId], references: [id])
 
   @@index([orderId], map: "OrderItem_orderId_fkey")
 }

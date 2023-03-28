@@ -5,7 +5,8 @@ import generateOrderId from "@/backend/utility/generate-order-id";
 import getMerchantId from "@/backend/utility/get-merchant-id";
 import HttpException from "@/backend/utility/http-exception";
 import { RouteHandler } from "@/backend/utility/route-handler";
-import { captureException, captureMessage } from "@sentry/nextjs";
+import { OrderBatch, OrderItem } from "@prisma/client";
+import { captureException } from "@sentry/nextjs";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
 
@@ -27,8 +28,6 @@ export default RouteHandler({
     });
 
     if (!payment.success) {
-      await captureMessage("Payment failed");
-
       throw new HttpException(
         {
           data: null,
@@ -38,8 +37,6 @@ export default RouteHandler({
         424
       );
     }
-
-    await captureMessage("Payment success");
 
     // Construct Order
     const order = await dbInstance.order.create({
@@ -54,38 +51,77 @@ export default RouteHandler({
       },
     });
 
-    await captureMessage("Order created", {});
+    const orderBatches: Partial<
+      OrderBatch & { studentId: string; items: Partial<OrderItem>[] }
+    >[] = [];
 
     const basketItems = await dbInstance.basket.findMany({
       where: {
         sessionId: sessionId,
       },
+      include: {
+        student: true,
+      },
     });
 
-    const basketItemMap = basketItems.map((item) => {
-      return new Promise(async (resolve, reject) => {
-        const product = products.find(
-          (product) => product.id === item.productId
-        )!;
+    basketItems.forEach((basketItem) => {
+      let batch = orderBatches.find((e) => {
+        return (
+          e.dateId === basketItem.dateId &&
+          e.menuId === basketItem.menuId &&
+          e.studentId === basketItem.studentId
+        );
+      });
 
-        await dbInstance.orderItem.create({
-          data: {
-            orderId: order.id,
-            productId: item.productId,
-            menuId: item.menuId,
-            dateId: item.dateId,
-            pricePerItemInCents: product.priceInCents,
-            quantity: item.quantity,
-          },
+      if (batch === undefined) {
+        orderBatches.push({
+          orderId: order.id,
+          dateId: basketItem.dateId,
+          menuId: basketItem.menuId,
+          studentId: basketItem.studentId,
+          studentFirstName: basketItem.student.firstName,
+          studentLastName: basketItem.student.lastName,
+          studentGrade: basketItem.student.grade,
+          items: [],
         });
 
-        resolve(null);
+        batch = orderBatches[orderBatches.length - 1];
+      }
+
+      const product = products.find(
+        (product) => product.id === basketItem.productId
+      )!;
+
+      batch.items!.push({
+        orderId: order.id,
+        pricePerItemInCents: product.priceInCents,
+        productId: basketItem.productId,
+        quantity: basketItem.quantity,
       });
     });
 
-    await Promise.all(basketItemMap);
+    for await (const batch of orderBatches) {
+      const newBatch = await dbInstance.orderBatch.create({
+        data: {
+          orderId: order.id,
+          dateId: batch.dateId!,
+          menuId: batch.menuId!,
+          studentFirstName: batch.studentFirstName!,
+          studentLastName: batch.studentLastName!,
+          studentGrade: batch.studentGrade!,
+        },
+      });
 
-    await captureMessage("Added items to order");
+      await dbInstance.orderItem.createMany({
+        data: batch.items!.map((bi) => ({
+          orderBatchId: newBatch.id,
+          orderId: order.id,
+          productId: bi.productId!,
+          pricePerItemInCents: bi.pricePerItemInCents!,
+          quantity: bi.quantity!,
+        })),
+      });
+    }
 
     // Cleanup session
     await dbInstance.session.delete({
@@ -94,16 +130,12 @@ export default RouteHandler({
       },
     });
 
-    await captureMessage("Deleted previous session");
-
     const newSession = await dbInstance.session.create({
       data: {
         createdAt: new Date(),
         merchantId: merchantId,
       },
     });
-
-    await captureMessage("Created new session");
 
     setCookie("session", newSession.id, { req, res });
     res.status(201).send("Order successfully created!");
