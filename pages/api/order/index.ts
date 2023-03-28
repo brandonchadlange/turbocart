@@ -5,7 +5,7 @@ import generateOrderId from "@/backend/utility/generate-order-id";
 import getMerchantId from "@/backend/utility/get-merchant-id";
 import HttpException from "@/backend/utility/http-exception";
 import { RouteHandler } from "@/backend/utility/route-handler";
-import { OrderBatch, OrderItem } from "@prisma/client";
+import { Order, OrderBatch, OrderItem } from "@prisma/client";
 import { captureException } from "@sentry/nextjs";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
@@ -38,19 +38,6 @@ export default RouteHandler({
       );
     }
 
-    // Construct Order
-    const order = await dbInstance.order.create({
-      data: {
-        id: generateOrderId(),
-        createdAt: new Date(),
-        paymentId: payment.response.id,
-        quantity: basketSummary.totalItems,
-        students: basketSummary.totalStudents,
-        totalInCents: basketSummary.totalInCents,
-        merchantId: merchantId,
-      },
-    });
-
     const orderBatches: Partial<
       OrderBatch & { studentId: string; items: Partial<OrderItem>[] }
     >[] = [];
@@ -75,7 +62,6 @@ export default RouteHandler({
 
       if (batch === undefined) {
         orderBatches.push({
-          orderId: order.id,
           dateId: basketItem.dateId,
           menuId: basketItem.menuId,
           studentId: basketItem.studentId,
@@ -93,17 +79,31 @@ export default RouteHandler({
       )!;
 
       batch.items!.push({
-        orderId: order.id,
         pricePerItemInCents: product.priceInCents,
         productId: basketItem.productId,
         quantity: basketItem.quantity,
       });
     });
 
+    // Construct Order
+    const order = await dbInstance.order.create({
+      data: {
+        id: generateOrderId(),
+        createdAt: new Date(),
+        paymentId: payment.response.id,
+        quantity: basketSummary.totalItems,
+        students: basketSummary.totalStudents,
+        totalInCents: basketSummary.totalInCents,
+        merchantId: merchantId,
+        totalBatches: orderBatches.length,
+        completeBatches: 0,
+      },
+    });
+
     for await (const batch of orderBatches) {
       const newBatch = await dbInstance.orderBatch.create({
         data: {
-          orderId: order.id,
+          orderId: order!.id,
           dateId: batch.dateId!,
           menuId: batch.menuId!,
           studentFirstName: batch.studentFirstName!,

@@ -57,6 +57,8 @@ model Order {
   customerFirstName String       @default("")
   customerLastName  String       @default("")
   customerEmail     String       @default("")
+  totalBatches      Int          @default(0)
+  completeBatches   Int          @default(0)
   merchant          Merchant     @relation(fields: [merchantId], references: [id])
   items             OrderItem[]
   batches           OrderBatch[]

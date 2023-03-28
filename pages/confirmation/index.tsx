@@ -16,6 +16,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 
@@ -62,13 +63,21 @@ const ConfirmationPage = () => {
       currency: "ZAR",
       name: "Checkout",
       description: "Awesome description",
-      callback: function (result: any) {
+      callback: async function (result: any) {
         if (result.error) {
           const errorMessage = result.error.message;
           alert("error occured: " + errorMessage);
         } else {
-          placeOrder(result.id, firstName, lastName, email);
-          router.push("/order-success");
+          try {
+            await placeOrder(result.id, firstName, lastName, email);
+            router.push("/order-success");
+          } catch (err) {
+            notifications.show({
+              title: "Failed to create order!",
+              message: "Please try again later.",
+              color: "red",
+            });
+          }
         }
       },
     });
