@@ -54,7 +54,7 @@ export default RouteHandler({
       },
     });
 
-    await captureMessage("Order created");
+    await captureMessage("Order created", {});
 
     const basketItems = await dbInstance.basket.findMany({
       where: {

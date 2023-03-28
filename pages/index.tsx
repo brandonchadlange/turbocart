@@ -88,7 +88,9 @@ export default function Home() {
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const sessionId = getCookie("session", { req, res });
-  const host = req.headers.host!;
+  const referer = req.headers.referer!;
+  const url = new URL(referer);
+  const host = url.host;
   const merchantId = host.split(".")[0];
 
   if (sessionId === undefined) {
