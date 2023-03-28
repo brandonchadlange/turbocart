@@ -11,7 +11,7 @@ const OrderSuccessPage = () => {
   return (
     <AppShell>
       <Stack align="center">
-        <Image height="300px" src="order-success.gif" />
+        <Image height="300px" src="success.gif" />
         {/* <video height="300px" muted autoPlay loop>
           <source src="order-success.mp4" />
         </video> */}
