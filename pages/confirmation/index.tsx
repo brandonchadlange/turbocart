@@ -5,9 +5,10 @@ import {
   AppShell,
   Button,
   Card,
+  Container,
   Divider,
-  Flex,
   Grid,
+  MediaQuery,
   Stack,
   Table,
   Text,
@@ -74,22 +75,22 @@ const ConfirmationPage = () => {
 
   return (
     <AppShell>
-      <Steps active={2} />
-      <main>
-        <Flex justify="center">
-          <Grid columns={2} w={1000} gutter={40}>
-            <Grid.Col span={1} mb="sm">
+      <Container mx="auto" p={0} pb={60}>
+        <Steps active={2} />
+        <main>
+          <Grid columns={2} gutter={40}>
+            <Grid.Col md={1} mb="sm">
               <Card withBorder>
                 <form onSubmit={form.onSubmit(onFormSubmit)}>
                   <Stack>
                     <Grid columns={2}>
-                      <Grid.Col span={1}>
+                      <Grid.Col md={1}>
                         <TextInput
                           {...form.getInputProps("firstName")}
                           label="First name"
                         />
                       </Grid.Col>
-                      <Grid.Col span={1}>
+                      <Grid.Col md={1}>
                         <TextInput
                           {...form.getInputProps("lastName")}
                           label="Last name"
@@ -107,7 +108,7 @@ const ConfirmationPage = () => {
                 </form>
               </Card>
             </Grid.Col>
-            <Grid.Col span={1} mb="sm">
+            <Grid.Col md={1} mb="sm">
               <Card withBorder px={0} py="xs">
                 <Table mt={10} horizontalSpacing="md">
                   <thead>
@@ -146,37 +147,39 @@ const ConfirmationPage = () => {
                 </Table>
               </Card>
             </Grid.Col>
-            <Grid.Col span={2} mb="sm">
-              <Card withBorder p={0}>
-                <Table fontSize="sm">
-                  <thead>
-                    <tr>
-                      <th>Student</th>
-                      <th>Item</th>
-                      <th>Date</th>
-                      <th>Period</th>
-                      <th>Quantity</th>
-                      <th>Cost</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {basketDetail.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.student.firstName}</td>
-                        <td>{item.product.name}</td>
-                        <td>{item.dateId}</td>
-                        <td>{item.menu.name}</td>
-                        <td>{item.quantity}</td>
-                        <td>R{item.product.priceInCents / 100}</td>
+            <MediaQuery smallerThan="md" styles={{ display: "none" }}>
+              <Grid.Col span={2} mb="sm">
+                <Card withBorder p={0}>
+                  <Table fontSize="sm">
+                    <thead>
+                      <tr>
+                        <th>Student</th>
+                        <th>Item</th>
+                        <th>Date</th>
+                        <th>Period</th>
+                        <th>Quantity</th>
+                        <th>Cost</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Card>
-            </Grid.Col>
+                    </thead>
+                    <tbody>
+                      {basketDetail.map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.student.firstName}</td>
+                          <td>{item.product.name}</td>
+                          <td>{item.dateId}</td>
+                          <td>{item.menu.name}</td>
+                          <td>{item.quantity}</td>
+                          <td>R{item.product.priceInCents / 100}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Card>
+              </Grid.Col>
+            </MediaQuery>
           </Grid>
-        </Flex>
-      </main>
+        </main>
+      </Container>
     </AppShell>
   );
 };
