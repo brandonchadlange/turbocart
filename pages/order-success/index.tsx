@@ -1,4 +1,4 @@
-import { AppShell, Button, Stack, Text, Title } from "@mantine/core";
+import { AppShell, Button, Image, Stack, Text, Title } from "@mantine/core";
 import { Hammersmith_One } from "next/font/google";
 import Link from "next/link";
 
@@ -11,9 +11,10 @@ const OrderSuccessPage = () => {
   return (
     <AppShell>
       <Stack align="center">
-        <video height="300px" muted autoPlay loop>
-          <source src="/order-success.mp4" />
-        </video>
+        <Image height="300px" src="order-success.gif" />
+        {/* <video height="300px" muted autoPlay loop>
+          <source src="order-success.mp4" />
+        </video> */}
         <Title className={hammerSmithOne.className}>Success!</Title>
         <Text size="xl" maw={300} align="center">
           Your payment was successful and your order has been placed.
