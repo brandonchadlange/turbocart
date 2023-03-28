@@ -4,6 +4,7 @@ import getBasketSummary from "@/backend/services/get-basket-summary";
 import generateOrderId from "@/backend/utility/generate-order-id";
 import HttpException from "@/backend/utility/http-exception";
 import { RouteHandler } from "@/backend/utility/route-handler";
+import { captureException } from "@sentry/nextjs";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
 
@@ -127,6 +128,11 @@ const tryMakePayment = async (data: {
       response: paymentResponse.data,
     };
   } catch (err) {
+    await captureException({
+      message: "Failed to make payment",
+      error: err,
+    });
+
     return {
       success: false,
       response: null,
