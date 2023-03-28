@@ -4,7 +4,7 @@ import getBasketSummary from "@/backend/services/get-basket-summary";
 import generateOrderId from "@/backend/utility/generate-order-id";
 import HttpException from "@/backend/utility/http-exception";
 import { RouteHandler } from "@/backend/utility/route-handler";
-import { captureException } from "@sentry/nextjs";
+import { captureException, captureMessage } from "@sentry/nextjs";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
 
@@ -27,6 +27,8 @@ export default RouteHandler({
     });
 
     if (!payment.success) {
+      await captureMessage("Payment failed");
+
       throw new HttpException(
         {
           data: null,
@@ -36,6 +38,8 @@ export default RouteHandler({
         424
       );
     }
+
+    await captureMessage("Payment success");
 
     // Construct Order
     const order = await dbInstance.order.create({
