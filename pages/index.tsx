@@ -5,6 +5,8 @@ import {
   Button,
   Card,
   Flex,
+  Header,
+  Image,
   Overlay,
   Stack,
   Text,
@@ -61,7 +63,7 @@ export default function Home() {
               Kids Lunch? <br />
               <Text color="yellow">Sorted!</Text>
             </Title>
-            <Text size={20} color="white" mt="lg" maw={500}>
+            <Text size={30} weight="bold" color="white" mt="lg" maw={500}>
               Order your childrens meals up to two weeks in advance!
             </Text>
             <Flex gap="md" mt={40}>

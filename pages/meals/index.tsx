@@ -4,6 +4,7 @@ import mutations from "@/frontend/utils/mutations";
 import queries from "@/frontend/utils/queries";
 import {
   ActionIcon,
+  Affix,
   AppShell,
   Button,
   Card,
@@ -14,22 +15,25 @@ import {
   Flex,
   Grid,
   Group,
+  Image,
+  MediaQuery,
   Modal,
   MultiSelect,
   NumberInput,
   Radio,
+  rem,
   SegmentedControl,
   Space,
   Stack,
   Table,
   Text,
   Title,
+  Transition,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { Student } from "@prisma/client";
-import { IconArrowBack, IconArrowLeft } from "@tabler/icons-react";
-import Image from "next/image";
+import { IconArrowLeft, IconArrowUp } from "@tabler/icons-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
@@ -220,20 +224,14 @@ const MealsPage = () => {
 
   return (
     <AppShell>
-      <Container mx="auto" p={0}>
-        <Flex align="center" gap="md">
-          <ActionIcon>
-            <IconArrowLeft />
-          </ActionIcon>
-          <Title>CBC Tuckshop</Title>
-        </Flex>
+      <Container mx="auto" p={0} pb={60}>
         <Steps active={1} />
         <main>
-          <Flex justify="center">
-            <Grid columns={2} w={1000} gutter={0}>
-              <Grid.Col span={1} mb="sm">
-                <MenuSelect {...menuSelect} />
-              </Grid.Col>
+          <Grid columns={2} gutter={0}>
+            <Grid.Col md={1} mb="sm">
+              <MenuSelect {...menuSelect} />
+            </Grid.Col>
+            <MediaQuery smallerThan="md" styles={{ display: "none" }}>
               <Grid.Col span={1} mb="sm">
                 <Flex justify="end" gap="sm">
                   <Button
@@ -252,36 +250,36 @@ const MealsPage = () => {
                   </Button>
                 </Flex>
               </Grid.Col>
-              <Grid.Col span={2}>
-                <Space h={20} />
-                <Stack spacing="lg">
-                  {menuSelect.selectedMenu?.categories.map((category) => (
-                    <div key={category.name}>
-                      <Title mb="xs" size={18}>
-                        {category.name}
-                      </Title>
-                      <Grid columns={3}>
-                        {category.items.map((item) => (
-                          <Grid.Col span={1} key={item.id}>
-                            <Card
-                              withBorder
-                              onClick={() => selectItem(item)}
-                              className="menu-item"
-                            >
-                              <Title size={14}>{item.name}</Title>
-                              <Text size="sm" color="dimmed">
-                                R{item.priceInCents / 100}
-                              </Text>
-                            </Card>
-                          </Grid.Col>
-                        ))}
-                      </Grid>
-                    </div>
-                  ))}
-                </Stack>
-              </Grid.Col>
-            </Grid>
-          </Flex>
+            </MediaQuery>
+            <Grid.Col span={2}>
+              <Space h={20} />
+              <Stack spacing="lg">
+                {menuSelect.selectedMenu?.categories.map((category) => (
+                  <div key={category.name}>
+                    <Title mb="xs" size={18}>
+                      {category.name}
+                    </Title>
+                    <Grid columns={3}>
+                      {category.items.map((item) => (
+                        <Grid.Col md={1} key={item.id}>
+                          <Card
+                            withBorder
+                            onClick={() => selectItem(item)}
+                            className="menu-item"
+                          >
+                            <Title size={14}>{item.name}</Title>
+                            <Text size="sm" color="dimmed">
+                              R{item.priceInCents / 100}
+                            </Text>
+                          </Card>
+                        </Grid.Col>
+                      ))}
+                    </Grid>
+                  </div>
+                ))}
+              </Stack>
+            </Grid.Col>
+          </Grid>
         </main>
       </Container>
       <Drawer
@@ -339,6 +337,27 @@ const MealsPage = () => {
           </Table>
         </Card>
       </Modal>
+      <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+        <Affix position={{ bottom: 0, left: 0 }} w="100%">
+          <Group p="md">
+            <Transition transition="slide-up" mounted={basket.length > 0}>
+              {(transitionStyles) => (
+                <Button
+                  component={Link}
+                  href="/confirmation"
+                  size="md"
+                  color="yellow"
+                  style={transitionStyles}
+                  fullWidth
+                  // onClick={() => scrollTo({ y: 0 })}
+                >
+                  Confirm & Pay
+                </Button>
+              )}
+            </Transition>
+          </Group>
+        </Affix>
+      </MediaQuery>
     </AppShell>
   );
 };
