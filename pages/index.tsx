@@ -1,4 +1,5 @@
 import dbInstance from "@/backend/db";
+import getMerchantId from "@/backend/utility/get-merchant-id";
 import {
   AppShell,
   BackgroundImage,
@@ -88,8 +89,7 @@ export default function Home() {
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const sessionId = getCookie("session", { req, res });
-  const host = req.rawHeaders[1];
-  const merchantId = host.split(".")[0];
+  const merchantId = getMerchantId(req.headers);
 
   if (sessionId === undefined) {
     try {

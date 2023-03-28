@@ -2,6 +2,7 @@ import products from "@/backend/data/products";
 import dbInstance from "@/backend/db";
 import getBasketSummary from "@/backend/services/get-basket-summary";
 import generateOrderId from "@/backend/utility/generate-order-id";
+import getMerchantId from "@/backend/utility/get-merchant-id";
 import HttpException from "@/backend/utility/http-exception";
 import { RouteHandler } from "@/backend/utility/route-handler";
 import { captureException, captureMessage } from "@sentry/nextjs";
@@ -15,8 +16,7 @@ export default RouteHandler({
   },
   async POST(req, res) {
     const sessionId = getCookie("session", { req, res })?.toString()!;
-    const host = req.headers.host!;
-    const merchantId = host.split(".")[0];
+    const merchantId = getMerchantId(req.headers);
 
     const basketSummary = await getBasketSummary(sessionId, products);
 
