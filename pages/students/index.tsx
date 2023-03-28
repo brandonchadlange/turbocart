@@ -38,7 +38,13 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const StudentFormComponent = ({ grades }: { grades: string[] }) => {
+const StudentFormComponent = ({
+  grades,
+  focusAfterSubmit,
+}: {
+  grades: string[];
+  focusAfterSubmit: boolean;
+}) => {
   const queryClient = useQueryClient();
   const { addStudent } = mutations;
   const firstNameRef = useRef<HTMLInputElement>(null);
@@ -58,7 +64,9 @@ const StudentFormComponent = ({ grades }: { grades: string[] }) => {
     await addStudent(data.firstName, data.lastName, data.grade);
     queryClient.refetchQueries("students");
     form.reset();
-    firstNameRef.current?.focus();
+    if (focusAfterSubmit) {
+      firstNameRef.current?.focus();
+    }
     setAddStudentLoading(false);
   };
 
@@ -79,19 +87,6 @@ const StudentFormComponent = ({ grades }: { grades: string[] }) => {
         </Button>
       </Flex>
     </form>
-  );
-};
-
-const StudentFormModal = ({ grades }: { grades: string[] }) => {
-  const [opened, setOpened] = useState(false);
-
-  return (
-    <>
-      <Button onClick={() => setOpened(true)}>Add student</Button>
-      <Modal opened={opened} onClose={() => setOpened(false)}>
-        <StudentFormComponent grades={grades} />
-      </Modal>
-    </>
   );
 };
 
@@ -123,7 +118,7 @@ const StudentsPage = () => {
           <MediaQuery smallerThan="md" styles={{ display: "none" }}>
             <Grid.Col md={1}>
               <Card withBorder style={{ overflow: "visible" }}>
-                <StudentFormComponent grades={grades} />
+                <StudentFormComponent focusAfterSubmit grades={grades} />
               </Card>
             </Grid.Col>
           </MediaQuery>
@@ -152,7 +147,10 @@ const StudentsPage = () => {
           <MediaQuery largerThan="sm" styles={{ display: "none" }}>
             <Grid.Col md={1}>
               <Card withBorder style={{ overflow: "visible" }}>
-                <StudentFormComponent grades={grades} />
+                <StudentFormComponent
+                  focusAfterSubmit={false}
+                  grades={grades}
+                />
               </Card>
             </Grid.Col>
           </MediaQuery>

@@ -45,7 +45,7 @@ type BasketFormProps = {
 const BasketForm = (props: BasketFormProps) => {
   const queryClient = useQueryClient();
   const { addToBasket } = mutations;
-  const { product, students, selectedMenu, dates } = props;
+  const { product, students, selectedMenu, dates, closeDrawer } = props;
   const [dateType, setDateType] = useState(dates.options[0].value);
   const [selectedDateIds, setSelectedDateIds] = useState<string[]>([]);
 
@@ -81,6 +81,7 @@ const BasketForm = (props: BasketFormProps) => {
     });
 
     form.reset();
+    closeDrawer();
     queryClient.fetchQuery("basket");
   };
 
