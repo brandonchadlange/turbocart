@@ -45,6 +45,7 @@ export default RouteHandler({
         quantity: basketSummary.totalItems,
         students: basketSummary.totalStudents,
         totalInCents: basketSummary.totalInCents,
+        merchantId: merchantId,
       },
     });
 
