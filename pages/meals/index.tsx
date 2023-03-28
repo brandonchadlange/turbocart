@@ -52,6 +52,7 @@ const BasketForm = (props: BasketFormProps) => {
   const { product, students, selectedMenu, dates, closeDrawer } = props;
   const [dateType, setDateType] = useState(dates.options[0].value);
   const [selectedDateIds, setSelectedDateIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const initialValues: any = {
     productId: product?.id,
@@ -76,6 +77,7 @@ const BasketForm = (props: BasketFormProps) => {
   });
 
   const onFormSubmit = async (data: AddToBasketRequest) => {
+    setLoading(true);
     data.dateIdList = selectedDateIds;
 
     await addToBasket(data);
@@ -86,6 +88,7 @@ const BasketForm = (props: BasketFormProps) => {
 
     form.reset();
     closeDrawer();
+    setLoading(false);
     queryClient.fetchQuery("basket");
   };
 
@@ -193,6 +196,7 @@ const BasketForm = (props: BasketFormProps) => {
         color="yellow"
         fullWidth
         mt="md"
+        loading={loading}
       >
         Add to Basket
       </Button>
@@ -226,8 +230,10 @@ const MealsPage = () => {
     <AppShell>
       <Container mx="auto" p={0} pb={60}>
         <Steps active={1} />
+        <Title>Menu</Title>
+        <Text>Add meals to your cart to continue</Text>
         <main>
-          <Grid columns={2} gutter={0}>
+          <Grid columns={2} gutter={0} mt="md">
             <Grid.Col md={1} mb="sm">
               <MenuSelect {...menuSelect} />
             </Grid.Col>

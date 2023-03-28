@@ -13,6 +13,7 @@ import {
   Table,
   Text,
   TextInput,
+  Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useRouter } from "next/router";
@@ -77,8 +78,10 @@ const ConfirmationPage = () => {
     <AppShell>
       <Container mx="auto" p={0} pb={60}>
         <Steps active={2} />
+        <Title>Confirmation</Title>
+        <Text>Enter your details and pay to place order</Text>
         <main>
-          <Grid columns={2} gutter={40}>
+          <Grid columns={2} gutter={40} mt="md">
             <Grid.Col md={1} mb="sm">
               <Card withBorder>
                 <form onSubmit={form.onSubmit(onFormSubmit)}>
