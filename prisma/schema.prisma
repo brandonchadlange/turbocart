@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -44,6 +41,9 @@ model Basket {
   quantity  Int
   session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], map: "Basket_sessionId_fkey")
+  @@index([studentId], map: "Basket_studentId_fkey")
 }
 
 model Order {
@@ -55,8 +55,10 @@ model Order {
   totalInCents Int          @default(0)
   students     Int          @default(0)
   merchant     Merchant     @relation(fields: [merchantId], references: [id])
-  items        OrderItem[]
   detail       OrderDetail?
+  items        OrderItem[]
+
+  @@index([merchantId], map: "Order_merchantId_fkey")
 }
 
 model OrderDetail {
@@ -70,7 +72,7 @@ model OrderDetail {
 
 model OrderDetailCustomer {
   id            String      @id @default(cuid())
-  orderDetailId String      @unique()
+  orderDetailId String      @unique
   firstName     String
   lastName      String
   grade         String
@@ -79,7 +81,7 @@ model OrderDetailCustomer {
 
 model OrderDetailStudent {
   id            String      @id @default(cuid())
-  orderDetailId String      @unique()
+  orderDetailId String      @unique
   firstName     String
   lastName      String
   grade         String
@@ -95,14 +97,18 @@ model OrderItem {
   quantity            Int
   pricePerItemInCents Int
   order               Order  @relation(fields: [orderId], references: [id])
+
+  @@index([orderId], map: "OrderItem_orderId_fkey")
 }
 
 model Student {
   id        String   @id @default(cuid())
   sessionId String
-  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   firstName String
   lastName  String
   grade     String
   basket    Basket[]
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], map: "Student_sessionId_fkey")
 }
