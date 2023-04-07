@@ -38,6 +38,8 @@ export default RouteHandler({
       );
     }
 
+    console.log("Payment successful");
+
     const orderBatches: Partial<
       OrderBatch & { studentId: string; items: Partial<OrderItem>[] }
     >[] = [];
@@ -50,6 +52,8 @@ export default RouteHandler({
         student: true,
       },
     });
+
+    console.log("Basket Items");
 
     basketItems.forEach((basketItem) => {
       let batch = orderBatches.find((e) => {
@@ -100,6 +104,8 @@ export default RouteHandler({
       },
     });
 
+    console.log("Order created");
+
     for await (const batch of orderBatches) {
       const newBatch = await dbInstance.orderBatch.create({
         data: {
@@ -123,12 +129,16 @@ export default RouteHandler({
       });
     }
 
+    console.log("Batches created");
+
     // Cleanup session
     await dbInstance.session.delete({
       where: {
         id: sessionId,
       },
     });
+
+    console.log("Session deleted");
 
     const newSession = await dbInstance.session.create({
       data: {
@@ -138,6 +148,9 @@ export default RouteHandler({
     });
 
     setCookie("session", newSession.id, { req, res });
+
+    console.log("Session created");
+
     res.status(201).send("Order successfully created!");
   },
 });

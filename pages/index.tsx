@@ -104,26 +104,26 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     } catch (err) {
       console.error("failed to create session: ", err);
     }
-  }
+  } else {
+    const existingSession = await dbInstance.session.findFirst({
+      where: {
+        id: sessionId!.toString(),
+      },
+    });
 
-  const existingSession = await dbInstance.session.findFirst({
-    where: {
-      id: sessionId!.toString(),
-    },
-  });
+    if (existingSession === null) {
+      try {
+        const session = await dbInstance.session.create({
+          data: {
+            createdAt: new Date(),
+            merchantId,
+          },
+        });
 
-  if (existingSession === null) {
-    try {
-      const session = await dbInstance.session.create({
-        data: {
-          createdAt: new Date(),
-          merchantId,
-        },
-      });
-
-      setCookie("session", session.id, { req, res });
-    } catch (err) {
-      console.error("failed to create session: ", err);
+        setCookie("session", session.id, { req, res });
+      } catch (err) {
+        console.error("failed to create session: ", err);
+      }
     }
   }
 
