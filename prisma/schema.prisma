@@ -74,6 +74,7 @@ model OrderBatch {
   studentFirstName String
   studentLastName  String
   studentGrade     String
+  fulfilled        Boolean     @default(false)
   order            Order       @relation(fields: [orderId], references: [id])
   items            OrderItem[]
 }
@@ -85,6 +86,7 @@ model OrderItem {
   productId           String
   quantity            Int
   pricePerItemInCents Int
+  packed              Boolean    @default(false)
   order               Order      @relation(fields: [orderId], references: [id])
   batch               OrderBatch @relation(fields: [orderBatchId], references: [id])
 

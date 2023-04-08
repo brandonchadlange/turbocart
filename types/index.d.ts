@@ -7,7 +7,7 @@ declare type HttpResponse<T> = {
 declare type Option = {
   value: string;
   label: string;
-  type: "single" | "multiple";
+  type: "single" | "multiple" | "variant";
   values: OptionValue[];
 };
 
@@ -21,6 +21,7 @@ declare type Product = {
   name: string;
   priceInCents: number;
   options?: Option[];
+  variants: Product[];
 };
 
 declare type Category = {
@@ -41,6 +42,7 @@ declare type AddToBasketRequest = {
   dateIdList: string[];
   options: any;
   quantity: any;
+  variant?: string;
 };
 
 type SummaryItem = {

@@ -54,12 +54,15 @@ const BasketForm = (props: BasketFormProps) => {
   const [selectedDateIds, setSelectedDateIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const showVariants = product?.variants!.length! > 0 || false;
+
   const initialValues: any = {
     productId: product?.id,
     menuId: selectedMenu?.id,
     dateIdList: selectedDateIds,
     options: {},
     quantity: {},
+    variant: showVariants ? product?.variants[0].id : null,
   };
 
   product?.options?.forEach((option) => {
@@ -79,6 +82,10 @@ const BasketForm = (props: BasketFormProps) => {
   const onFormSubmit = async (data: AddToBasketRequest) => {
     setLoading(true);
     data.dateIdList = selectedDateIds;
+
+    if (data.variant) {
+      data.productId = data.variant;
+    }
 
     await addToBasket(data);
 
@@ -132,6 +139,24 @@ const BasketForm = (props: BasketFormProps) => {
               disabled: date.disabled,
             }))}
           />
+        )}
+        {showVariants && (
+          <Radio.Group
+            label="Choose"
+            name="variant"
+            size="sm"
+            {...form.getInputProps("variant")}
+          >
+            <Group>
+              {product?.variants.map((variant) => (
+                <Radio
+                  key={variant.id}
+                  value={variant.id}
+                  label={variant.name}
+                />
+              ))}
+            </Group>
+          </Radio.Group>
         )}
         {product?.options?.map((option) => (
           <div key={option.value}>

@@ -17,6 +17,8 @@ export class Product {
   name: string;
   priceInCents: number;
   options: Option[] = [];
+  variants: Product[] = [];
+  recipe: Product[] = [];
 
   constructor(id: string, name: string, priceInCents: number) {
     this.id = id;
@@ -37,147 +39,213 @@ export class Product {
       values,
     });
   }
+
+  addVariants(variants: Product[]) {
+    this.variants.push(...variants);
+  }
+
+  addRecipe(products: Product[]) {
+    this.recipe.push(...products);
+  }
 }
 
+class ProductFactory {
+  private id: number = 0;
+  private variantId: number = 0;
+
+  constructor() {}
+
+  createProduct(name: string, priceInCents: number) {
+    this.id++;
+    return new Product(this.id.toString(), name, priceInCents);
+  }
+
+  createProductVariant(name: string, priceInCents: number) {
+    this.variantId++;
+    return new Product("var-" + this.variantId.toString(), name, priceInCents);
+  }
+}
+
+const productFactory = new ProductFactory();
+
 // BREAKFAST
-export const egg_bun = new Product("1", "Egg Bun", 1500);
-export const bacon_egg_bun = new Product("2", "Bacon & Egg Bun", 2800);
-export const breakfast_wrap = new Product("3", "Breakfast Wrap", 3500);
+export const egg_bun = productFactory.createProduct("Egg Bun", 1500);
+export const bacon_egg_bun = productFactory.createProduct(
+  "Bacon & Egg Bun",
+  2800
+);
+export const breakfast_wrap = productFactory.createProduct(
+  "Breakfast Wrap",
+  3500
+);
 
 // SANDWICHES
-export const cheese_sandwich = new Product("4", "Cheese", 2400);
-export const cheese_tomato_sandwich = new Product("5", "Cheese & Tomato", 2600);
-export const chicken_mayo_sandwich = new Product("6", "Chicken Mayo", 3000);
-export const bacon_cheese_sandwich = new Product("7", "Bacon & Cheese", 3200);
-export const bacon_egg_cheese_sandwich = new Product(
-  "8",
+export const cheese_sandwich = productFactory.createProduct("Cheese", 2400);
+export const cheese_tomato_sandwich = productFactory.createProduct(
+  "Cheese & Tomato",
+  2600
+);
+export const chicken_mayo_sandwich = productFactory.createProduct(
+  "Chicken Mayo",
+  3000
+);
+export const bacon_cheese_sandwich = productFactory.createProduct(
+  "Bacon & Cheese",
+  3200
+);
+export const bacon_egg_cheese_sandwich = productFactory.createProduct(
   "Bacon, Egg & Cheese",
   3400
 );
 
 // ROLLS
-export const ham_cheese_roll = new Product("9", "Ham & Cheese", 3600);
-export const chicken_mayo_roll = new Product("10", "Chicken Mayo", 3000);
+export const ham_cheese_roll = productFactory.createProduct(
+  "Ham & Cheese",
+  3600
+);
+export const chicken_mayo_roll = productFactory.createProduct(
+  "Chicken Mayo",
+  3000
+);
 
 // WRAPS
-export const chicken_mayo_wrap = new Product("11", "Chicken Mayo", 3600);
-export const sweet_chilli_chickent_wrap = new Product(
-  "12",
+export const chicken_mayo_wrap = productFactory.createProduct(
+  "Chicken Mayo",
+  3600
+);
+export const sweet_chilli_chickent_wrap = productFactory.createProduct(
   "Sweet Chilli Chicken",
   3600
 );
-export const blt_cheese_wrap = new Product("13", "BLT Cheese", 3600);
+export const blt_cheese_wrap = productFactory.createProduct("BLT Cheese", 3600);
 
 // GRILL
-export const boerewors_roll = new Product("14", "Boerewors Roll", 3000);
-export const boerewors_roll_chips = new Product(
-  "15",
+export const small_chips = productFactory.createProductVariant(
+  "Small Chips",
+  1500
+);
+export const large_chips = productFactory.createProductVariant(
+  "Large Chips",
+  2500
+);
+
+export const boerewors_roll = productFactory.createProduct(
+  "Boerewors Roll",
+  3000
+);
+export const boerewors_roll_chips = productFactory.createProduct(
   "Boerewors Roll & Chips",
   3000
 );
-export const burger = new Product("16", "Burger", 3000);
 
-burger.addOption("type", "Type", "single", [
-  {
-    label: "Beef",
-    value: "beef",
-  },
-  {
-    label: "Chicken",
-    value: "chicken",
-  },
-]);
+boerewors_roll_chips.addRecipe([boerewors_roll, small_chips]);
 
-export const burger_chips = new Product("17", "Burger & Chips", 5300);
+const beef_burger = productFactory.createProductVariant("Beef Burger", 3000);
+const chicken_burger = productFactory.createProductVariant(
+  "Chicken Burger",
+  3000
+);
 
-burger_chips.addOption("type", "Type", "single", [
-  {
-    label: "Beef",
-    value: "beef",
-  },
-  {
-    label: "Chicken",
-    value: "chicken",
-  },
-]);
+export const burger = productFactory.createProduct("Burger", 3000);
+burger.addVariants([beef_burger, chicken_burger]);
 
-burger_chips.addOption("extras", "Extras", "multiple", [
-  {
-    label: "Cheese",
-    value: "cheese",
-  },
-  {
-    label: "Bacon",
-    value: "bacon",
-  },
-]);
+export const beef_burger_chips = productFactory.createProductVariant(
+  "Beef Burger & Chips",
+  5300
+);
+beef_burger_chips.addRecipe([beef_burger, small_chips]);
 
-export const chicken_strips = new Product("18", "Chicken Strips", 3400);
-export const chicken_strips_chips = new Product(
-  "19",
-  "Chicken Strips & Chips",
+export const chicken_burger_chips = productFactory.createProductVariant(
+  "Chicken Burger & Chips",
+  5300
+);
+chicken_burger_chips.addRecipe([beef_burger, small_chips]);
+
+export const burger_chips = productFactory.createProduct(
+  "Burger & Chips",
+  5300
+);
+
+burger_chips.addVariants([beef_burger_chips, chicken_burger_chips]);
+
+export const chicken_strips = productFactory.createProduct(
+  "Chicken Strips",
+  3400
+);
+export const chicken_strips_chips = productFactory.createProduct(
+  "Chicken Strips",
   4800
 );
-export const chicken_wings = new Product("20", "Chicken Wings", 3400);
-export const chicken_wings_chips = new Product(
-  "21",
+export const chicken_wings = productFactory.createProduct(
+  "Chicken Wings",
+  3400
+);
+export const chicken_wings_chips = productFactory.createProduct(
   "Chicken Wings & Chips",
   4800
 );
 
-export const chips = new Product("22", "Boerewors Roll & Chips", 3000);
+export const chips = productFactory.createProduct("Chips", 3000);
 
-chips.addOption("size", "Size", "single", [
-  {
-    label: "Large",
-    value: "large",
-  },
-  {
-    label: "Small",
-    value: "small",
-  },
-]);
+chips.addVariants([small_chips, large_chips]);
 
 // SALAD
-export const chicken_honey_mustard_salad = new Product(
-  "23",
+export const chicken_honey_mustard_salad = productFactory.createProduct(
   "Chicken Honey Mustard",
   3000
 );
-export const bacon_feta_salad = new Product("24", "Bacon & Feta", 3200);
+export const bacon_feta_salad = productFactory.createProduct(
+  "Bacon & Feta",
+  3200
+);
 
 // LUNCH BOX
-export const cheese_box = new Product("25", "Cheese Box", 4800);
-export const meat_box = new Product("26", "Meat Box", 5500);
-export const chicken_box = new Product("27", "Chicken Box", 5800);
+export const cheese_box = productFactory.createProduct("Cheese Box", 4800);
+export const meat_box = productFactory.createProduct("Meat Box", 5500);
+export const chicken_box = productFactory.createProduct("Chicken Box", 5800);
 
 // COLD DRINKS
-export const water = new Product("28", "Water", 1200);
-export const water_flavoured_500 = new Product(
-  "29",
+export const water = productFactory.createProduct("Water", 1200);
+export const water_flavoured_500 = productFactory.createProduct(
   "Water Flavoured 500ml",
   1400
 );
-export const water_flavoured_750 = new Product(
-  "30",
+export const water_flavoured_750 = productFactory.createProduct(
   "Water Flavoured 750ml",
   1600
 );
-export const tizer = new Product("31", "Tizer", 1600);
-export const assorted_cans = new Product("32", "Assorted Cans", 1600);
-export const iced_tea = new Product("33", "Iced Tea", 1600);
-export const fruit_juice = new Product("34", "Fruit Juice", 1600);
-export const juice_box = new Product("35", "Juice Box", 1200);
-export const sports_drink = new Product("36", "Juice Box", 1200);
+
+export const apple_tizer = productFactory.createProductVariant(
+  "Apple Tizer",
+  1600
+);
+export const grape_tizer = productFactory.createProductVariant(
+  "Grape Tizer",
+  1600
+);
+export const tizer = productFactory.createProduct("Tizer", 1600);
+tizer.addVariants([apple_tizer, grape_tizer]);
+
+const coke = productFactory.createProductVariant("Coke", 1600);
+const fanta = productFactory.createProductVariant("Fanta", 1600);
+const sprite = productFactory.createProductVariant("Sprite", 1600);
+
+export const soft_drinks = productFactory.createProduct("Soft Drinks", 1600);
+soft_drinks.addVariants([coke, fanta, sprite]);
+
+export const iced_tea = productFactory.createProduct("Iced Tea", 1600);
+export const fruit_juice = productFactory.createProduct("Fruit Juice", 1600);
+export const juice_box = productFactory.createProduct("Juice Box", 1200);
+export const sports_drink = productFactory.createProduct("Sports Drink", 1600);
 
 // SNACKS
-export const crisps = new Product("37", "Crisps", 1000);
-export const doritos = new Product("38", "Doritos", 1200);
-export const energy_bar = new Product("39", "Energy Bar", 1800);
-export const wine_gums = new Product("40", "Wine Gums", 1200);
-export const popcorn = new Product("41", "Popcorn", 1200);
-export const chocolate = new Product("42", "Chocolate", 1500);
-export const muffin = new Product("43", "Muffin Giant Filled", 2500);
+export const crisps = productFactory.createProduct("Crisps", 1000);
+export const doritos = productFactory.createProduct("Doritos", 1200);
+export const energy_bar = productFactory.createProduct("Energy Bar", 1800);
+export const wine_gums = productFactory.createProduct("Wine Gums", 1200);
+export const popcorn = productFactory.createProduct("Popcorn", 1200);
+export const chocolate = productFactory.createProduct("Chocolate", 1500);
+export const muffin = productFactory.createProduct("Muffin Giant Filled", 2500);
 
 export default [
   egg_bun,
@@ -195,12 +263,18 @@ export default [
   blt_cheese_wrap,
   boerewors_roll,
   boerewors_roll_chips,
+  beef_burger,
+  chicken_burger,
   burger,
+  beef_burger_chips,
+  chicken_burger_chips,
   burger_chips,
   chicken_strips,
   chicken_strips_chips,
   chicken_wings,
   chicken_wings_chips,
+  small_chips,
+  large_chips,
   chips,
   chicken_honey_mustard_salad,
   bacon_feta_salad,
@@ -210,8 +284,13 @@ export default [
   water,
   water_flavoured_500,
   water_flavoured_750,
+  apple_tizer,
+  grape_tizer,
   tizer,
-  assorted_cans,
+  coke,
+  fanta,
+  sprite,
+  soft_drinks,
   iced_tea,
   fruit_juice,
   juice_box,

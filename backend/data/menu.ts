@@ -76,7 +76,7 @@ cold_drinks_category.addProduct(products.water);
 cold_drinks_category.addProduct(products.water_flavoured_500);
 cold_drinks_category.addProduct(products.water_flavoured_750);
 cold_drinks_category.addProduct(products.tizer);
-cold_drinks_category.addProduct(products.assorted_cans);
+cold_drinks_category.addProduct(products.soft_drinks);
 cold_drinks_category.addProduct(products.iced_tea);
 cold_drinks_category.addProduct(products.fruit_juice);
 cold_drinks_category.addProduct(products.juice_box);
