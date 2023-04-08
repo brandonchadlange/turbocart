@@ -24,7 +24,7 @@ export default RouteHandler({
     // Make Payment
     const payment = await tryMakePayment({
       token: req.body.token,
-      totalInCents: basketSummary.totalInCents,
+      totalInCents: basketSummary.totalInCents + 1200,
     });
 
     if (!payment.success) {
@@ -37,8 +37,6 @@ export default RouteHandler({
         424
       );
     }
-
-    console.log("Payment successful");
 
     const orderBatches: Partial<
       OrderBatch & { studentId: string; items: Partial<OrderItem>[] }
@@ -96,8 +94,9 @@ export default RouteHandler({
         createdAt: new Date(),
         paymentId: payment.response.id,
         quantity: basketSummary.totalItems,
+        serviceFeeInCents: 1200,
         students: basketSummary.totalStudents,
-        totalInCents: basketSummary.totalInCents,
+        totalInCents: basketSummary.totalInCents + 1200,
         merchantId: merchantId,
         totalBatches: orderBatches.length,
         completeBatches: 0,

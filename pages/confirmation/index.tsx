@@ -143,15 +143,23 @@ const ConfirmationPage = () => {
                   </tbody>
                 </Table>
                 <Divider my="xs" />
-                <Table fontSize="lg" horizontalSpacing="md">
+                <Table fontSize="sm" horizontalSpacing="md">
                   <tbody>
+                    <tr>
+                      <td>
+                        <Text>Service fee:</Text>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <Text>R12</Text>
+                      </td>
+                    </tr>
                     <tr>
                       <td>
                         <Text weight="bold">Total:</Text>
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <Text weight="bold">
-                          R{basketSummary.totalInCents / 100}
+                          R{basketSummary.totalInCents / 100 + 12}
                         </Text>
                       </td>
                     </tr>

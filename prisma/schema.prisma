@@ -52,6 +52,7 @@ model Order {
   merchantId        String
   paymentId         String
   quantity          Int          @default(0)
+  serviceFeeInCents Int          @default(0)
   totalInCents      Int          @default(0)
   students          Int          @default(0)
   customerFirstName String       @default("")
