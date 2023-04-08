@@ -73,7 +73,7 @@ export const boerewors_roll = new Product("14", "Boerewors Roll", 3000);
 export const boerewors_roll_chips = new Product(
   "15",
   "Boerewors Roll & Chips",
-  30
+  3000
 );
 export const burger = new Product("16", "Burger", 3000);
 
@@ -224,41 +224,3 @@ export default [
   chocolate,
   muffin,
 ];
-
-// export default [
-//   {
-//     id: "1",
-//     name: "Yoghurt Cup (150ml)",
-//     priceInCents: 1500,
-//   },
-//   {
-//     id: "2",
-//     name: "Bacon & Egg Bun",
-//     priceInCents: 2800,
-//   },
-//   {
-//     id: "3",
-//     name: "Breakfast Wrap",
-//     priceInCents: 3500,
-//   },
-//   {
-//     id: "4",
-//     name: "Cheese & Tomato",
-//     priceInCents: 2200,
-//   },
-//   {
-//     id: "4",
-//     name: "Cheese & Tomato",
-//     priceInCents: 2200,
-//   },
-//   {
-//     id: "5",
-//     name: "Chicken Mayo",
-//     priceInCents: 2800,
-//   },
-//   {
-//     id: "6",
-//     name: "Bacon, Egg & Cheese",
-//     priceInCents: 3000,
-//   },
-// ];
