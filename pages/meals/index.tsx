@@ -29,9 +29,10 @@ import {
   Transition,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useViewportSize } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { Student } from "@prisma/client";
-import { IconTrash } from "@tabler/icons-react";
+import { IconShoppingCart, IconTrash } from "@tabler/icons-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
@@ -229,6 +230,7 @@ const BasketForm = (props: BasketFormProps) => {
 };
 
 const MealsPage = () => {
+  const { height, width } = useViewportSize();
   const { fetchStudents, fetchBasketDetail, fetchDates } = queries;
   const { removeFromBasket } = mutations;
   const menuSelect = useMenuSelect();
@@ -256,6 +258,8 @@ const MealsPage = () => {
     basketQuery.refetch();
   };
 
+  const isMobile = width < 700;
+
   return (
     <AppShell>
       <Container mx="auto" p={0} pb={60}>
@@ -265,17 +269,21 @@ const MealsPage = () => {
         <main>
           <Grid columns={2} gutter={0} mt="md">
             <Grid.Col md={1} mb="sm">
-              <MenuSelect {...menuSelect} />
-            </Grid.Col>
-            <MediaQuery smallerThan="md" styles={{ display: "none" }}>
-              <Grid.Col span={1} mb="sm">
-                <Flex justify="end" gap="sm">
+              <Flex justify="space-between">
+                <MenuSelect {...menuSelect} />
+                <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                   <Button
                     variant="default"
                     onClick={() => setDetailsOpened(true)}
                   >
                     Details
                   </Button>
+                </MediaQuery>
+              </Flex>
+            </Grid.Col>
+            <Grid.Col span={1} mb="sm">
+              <MediaQuery smallerThan="md" styles={{ display: "none" }}>
+                <Flex justify="end" gap="sm">
                   <Button
                     color="yellow"
                     disabled={confirmAndPayDisabled}
@@ -284,9 +292,15 @@ const MealsPage = () => {
                   >
                     Confirm & Pay
                   </Button>
+                  <Button
+                    variant="default"
+                    onClick={() => setDetailsOpened(true)}
+                  >
+                    Details
+                  </Button>
                 </Flex>
-              </Grid.Col>
-            </MediaQuery>
+              </MediaQuery>
+            </Grid.Col>
             <Grid.Col span={2}>
               <Space h={20} />
               <Stack spacing="lg">
@@ -341,43 +355,74 @@ const MealsPage = () => {
         />
       </Drawer>
       <Modal
+        title={<Title>My Basket</Title>}
+        fullScreen={isMobile}
         size="xl"
         centered
         opened={detailsOpened}
         onClose={() => setDetailsOpened(false)}
       >
-        <Card withBorder p={0}>
-          <Table fontSize="sm">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Item</th>
-                <th>Date</th>
-                <th>Period</th>
-                <th>Quantity</th>
-                <th>Cost</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {basket.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.student.firstName}</td>
-                  <td>{item.product.name}</td>
-                  <td>{item.dateId}</td>
-                  <td>{item.menu.name}</td>
-                  <td>{item.quantity}</td>
-                  <td>R{item.product.priceInCents / 100}</td>
-                  <td>
-                    <ActionIcon onClick={() => removeItemFromBasket(item.id)}>
-                      <IconTrash />
-                    </ActionIcon>
-                  </td>
+        {!isMobile && (
+          <Card withBorder p={0}>
+            <Table fontSize="sm">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Item</th>
+                  <th>Date</th>
+                  <th>Period</th>
+                  <th>Quantity</th>
+                  <th>Cost</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card>
+              </thead>
+              <tbody>
+                {basket.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.student.firstName}</td>
+                    <td>{item.product.name}</td>
+                    <td>{item.dateId}</td>
+                    <td>{item.menu.name}</td>
+                    <td>{item.quantity}</td>
+                    <td>R{item.product.priceInCents / 100}</td>
+                    <td>
+                      <ActionIcon onClick={() => removeItemFromBasket(item.id)}>
+                        <IconTrash />
+                      </ActionIcon>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        )}
+        {isMobile && (
+          <Stack spacing="xs">
+            {basket.map((item) => (
+              <Card key={item.id} withBorder>
+                <Flex justify="space-between">
+                  <Stack spacing={0}>
+                    <Text size="sm">Student: {item.student.firstName}</Text>
+                    <Text size="sm">Date: {item.dateId}</Text>
+                    <Text size="sm">Period: {item.menu.name}</Text>
+                  </Stack>
+                  <ActionIcon onClick={() => removeItemFromBasket(item.id)}>
+                    <IconTrash />
+                  </ActionIcon>
+                </Flex>
+                <Flex justify="space-between" mt="sm">
+                  <Text>
+                    {item.quantity} x {item.product.name} @ R
+                    {item.product.priceInCents / 100}
+                  </Text>
+                  <Text>
+                    R{(item.product.priceInCents / 100) * item.quantity}
+                  </Text>
+                </Flex>
+              </Card>
+            ))}
+          </Stack>
+        )}
       </Modal>
       <MediaQuery largerThan="sm" styles={{ display: "none" }}>
         <Affix position={{ bottom: 0, left: 0 }} w="100%">
