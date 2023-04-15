@@ -89,7 +89,7 @@ snacks_category.addProduct(products.energy_bar);
 snacks_category.addProduct(products.wine_gums);
 snacks_category.addProduct(products.popcorn);
 snacks_category.addProduct(products.chocolate);
-snacks_category.addProduct(products.muffin);
+// snacks_category.addProduct(products.muffin);
 
 // ASSIGN CATEGORIES TO MENUS
 
