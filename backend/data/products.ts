@@ -243,7 +243,7 @@ export const energy_bar = productFactory.createProduct("Energy Bar", 1800);
 export const wine_gums = productFactory.createProduct("Wine Gums", 1200);
 export const popcorn = productFactory.createProduct("Popcorn", 1200);
 export const chocolate = productFactory.createProduct("Chocolate", 1500);
-export const muffin = productFactory.createProduct("Muffin Giant Filled", 2500);
+// export const muffin = productFactory.createProduct("Muffin Giant Filled", 2500);
 
 // LUNCH BOX
 const cheese_wedge = productFactory.createProductVariant("Cheese Wedge", 0);
@@ -313,5 +313,5 @@ export default [
   wine_gums,
   popcorn,
   chocolate,
-  muffin,
+  // muffin,
 ];
