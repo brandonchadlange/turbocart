@@ -5,15 +5,20 @@ export default RouteHandler({
   async GET(req, res) {
     const response: any[] = [];
     const now = DateTime.now().setLocale("en-ZA");
-    const weekDayNumber = now.weekday;
+    let weekDayNumber = now.weekday;
     const currentHour = now.hour;
-    const startOfWeek =
+    let startOfWeek =
       weekDayNumber > 5
         ? now.plus({ days: 7 - weekDayNumber })
         : now.minus({ days: weekDayNumber });
 
+    if (weekDayNumber === 5) {
+      startOfWeek = now.plus({ days: 2 });
+      weekDayNumber = startOfWeek.weekday;
+    }
+
     for (var i = 0; i < 5; i++) {
-      // if(i >= weekDayNumber) {
+      // if (i >= weekDayNumber) {
       const dayToAdd = startOfWeek.plus({ days: i + 1 });
       let status = "complete";
 
@@ -58,7 +63,7 @@ export default RouteHandler({
       });
     }
 
-    if (weekDayNumber < 6) {
+    if (weekDayNumber < 5) {
       if (currentHour < 10) {
         options.push({
           label: "Today",

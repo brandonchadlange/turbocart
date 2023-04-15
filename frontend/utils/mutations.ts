@@ -39,8 +39,14 @@ const mutations = {
       url: "/api/basket",
       data,
     }),
+  removeFromBasket: (basketItemId: string) =>
+    runMutation({
+      method: "DELETE",
+      url: "/api/basket/item/" + basketItemId,
+    }),
   placeOrder: (
     token: string,
+    paymentMethodId: string,
     firstName: string,
     lastName: string,
     email: string
@@ -50,6 +56,7 @@ const mutations = {
       url: "/api/order",
       data: {
         token,
+        paymentMethodId,
         firstName,
         lastName,
         email,

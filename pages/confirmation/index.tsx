@@ -18,6 +18,7 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 
 const attachYocoScript = () => {
@@ -30,15 +31,22 @@ const attachYocoScript = () => {
 };
 
 const ConfirmationPage = () => {
+  const [paymentMethod, setPaymentMethod] = useState<any>();
   const router = useRouter();
 
   const form = useForm();
 
-  const { fetchBasketSummary, fetchBasketDetail } = queries;
+  const {
+    fetchBasketSummary,
+    fetchBasketDetail,
+    fetchPaymentMethods,
+    fetchPaymentMethodConfig,
+  } = queries;
   const { placeOrder } = mutations;
 
   const basketSummaryQuery = useQuery("basket-summary", fetchBasketSummary);
   const basketDetailQuery = useQuery("basket-detail", fetchBasketDetail);
+  const paymentMethodsQuery = useQuery("payment-methods", fetchPaymentMethods);
 
   const basketSummary: BasketSummary = basketSummaryQuery.data || {
     totalInCents: 0,
@@ -46,6 +54,19 @@ const ConfirmationPage = () => {
     totalItems: 0,
     totalStudents: 0,
   };
+
+  const fetchPaymentMethod = async (paymentMethodId: string) => {
+    const response = await fetchPaymentMethodConfig(paymentMethodId);
+    setPaymentMethod(response);
+  };
+
+  useEffect(() => {
+    if (paymentMethodsQuery.isLoading) return;
+
+    if (paymentMethodsQuery.data!.length === 1) {
+      fetchPaymentMethod(paymentMethodsQuery.data![0].id);
+    }
+  }, [paymentMethodsQuery.isLoading]);
 
   const basketDetail = basketDetailQuery.data || [];
 
@@ -55,11 +76,11 @@ const ConfirmationPage = () => {
 
     // @ts-ignore
     const yoco = new window.YocoSDK({
-      publicKey: "pk_test_ed3c54a6gOol69qa7f45",
+      publicKey: paymentMethod.configuration.publicKey,
     });
 
     yoco.showPopup({
-      amountInCents: basketSummary.totalInCents,
+      amountInCents: basketSummary.totalInCents + 1200,
       currency: "ZAR",
       name: "Checkout",
       description: "Awesome description",
@@ -69,7 +90,13 @@ const ConfirmationPage = () => {
           alert("error occured: " + errorMessage);
         } else {
           try {
-            await placeOrder(result.id, firstName, lastName, email);
+            await placeOrder(
+              result.id,
+              paymentMethod.id,
+              firstName,
+              lastName,
+              email
+            );
             router.push("/order-success");
           } catch (err) {
             notifications.show({

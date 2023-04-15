@@ -8,11 +8,24 @@ datasource db {
 }
 
 model Merchant {
-  id             String  @id
+  id             String          @id
   name           String
   yocoPublicKey  String
   yocoPrivateKey String
+  clerkId        String          @default("")
   orders         Order[]
+  paymentMethods PaymentMethod[]
+}
+
+model PaymentMethod {
+  id            String   @id @default(cuid())
+  merchantId    String
+  merchant      Merchant @relation(fields: [merchantId], references: [id])
+  name          String
+  description   String
+  provider      String
+  enabled       Boolean
+  configuration String
 }
 
 model Session {
@@ -21,14 +34,6 @@ model Session {
   createdAt  DateTime
   basket     Basket[]
   Student    Student[]
-}
-
-model User {
-  id           String @id @default(cuid())
-  firstName    String
-  lastName     String
-  email        String
-  passwordHash String
 }
 
 model Basket {
@@ -52,17 +57,17 @@ model Order {
   merchantId        String
   paymentId         String
   quantity          Int          @default(0)
-  serviceFeeInCents Int          @default(0)
   totalInCents      Int          @default(0)
   students          Int          @default(0)
+  customerEmail     String       @default("")
   customerFirstName String       @default("")
   customerLastName  String       @default("")
-  customerEmail     String       @default("")
-  totalBatches      Int          @default(0)
   completeBatches   Int          @default(0)
+  totalBatches      Int          @default(0)
+  serviceFeeInCents Int          @default(0)
   merchant          Merchant     @relation(fields: [merchantId], references: [id])
-  items             OrderItem[]
   batches           OrderBatch[]
+  items             OrderItem[]
 
   @@index([merchantId], map: "Order_merchantId_fkey")
 }
@@ -78,20 +83,23 @@ model OrderBatch {
   fulfilled        Boolean     @default(false)
   order            Order       @relation(fields: [orderId], references: [id])
   items            OrderItem[]
+
+  @@index([orderId], map: "OrderBatch_orderId_fkey")
 }
 
 model OrderItem {
   id                  String     @id @default(cuid())
   orderId             String
-  orderBatchId        String
   productId           String
   quantity            Int
   pricePerItemInCents Int
+  orderBatchId        String
   packed              Boolean    @default(false)
-  order               Order      @relation(fields: [orderId], references: [id])
   batch               OrderBatch @relation(fields: [orderBatchId], references: [id])
+  order               Order      @relation(fields: [orderId], references: [id])
 
   @@index([orderId], map: "OrderItem_orderId_fkey")
+  @@index([orderBatchId], map: "OrderItem_orderBatchId_fkey")
 }
 
 model Student {
@@ -104,4 +112,77 @@ model Student {
   session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId], map: "Student_sessionId_fkey")
+}
+
+model Attribute {
+  id               String             @id @default(cuid())
+  name             String
+  AttributeValue   AttributeValue[]
+  VariantAttribute VariantAttribute[]
+}
+
+model AttributeValue {
+  id               String             @id @default(cuid())
+  attributeId      String
+  value            String
+  Attribute        Attribute          @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  VariantAttribute VariantAttribute[]
+
+  @@index([attributeId], map: "AttributeValue_attributeId_fkey")
+}
+
+model HierachyLevel {
+  id           String         @id @default(cuid())
+  name         String
+  level        Int
+  HierachyNode HierachyNode[]
+}
+
+model HierachyNode {
+  id                                                         String              @id @default(cuid())
+  name                                                       String
+  hierachyLevelId                                            String
+  HierachyLevel                                              HierachyLevel       @relation(fields: [hierachyLevelId], references: [id])
+  HierachyStructure_HierachyStructure_childIdToHierachyNode  HierachyStructure[] @relation("HierachyStructure_childIdToHierachyNode")
+  HierachyStructure_HierachyStructure_parentIdToHierachyNode HierachyStructure[] @relation("HierachyStructure_parentIdToHierachyNode")
+
+  @@index([hierachyLevelId], map: "HierachyNode_hierachyLevelId_fkey")
+}
+
+model HierachyStructure {
+  parentId                                              String
+  childId                                               String
+  HierachyNode_HierachyStructure_childIdToHierachyNode  HierachyNode @relation("HierachyStructure_childIdToHierachyNode", fields: [childId], references: [id])
+  HierachyNode_HierachyStructure_parentIdToHierachyNode HierachyNode @relation("HierachyStructure_parentIdToHierachyNode", fields: [parentId], references: [id])
+
+  @@id([parentId, childId])
+  @@index([childId], map: "HierachyStructure_childId_fkey")
+}
+
+model Product {
+  id      String    @id
+  name    String
+  Variant Variant[]
+}
+
+model Variant {
+  id               String             @id
+  productId        String
+  Product          Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  VariantAttribute VariantAttribute[]
+
+  @@index([productId], map: "Variant_productId_fkey")
+}
+
+model VariantAttribute {
+  variantId        String
+  attributeId      String
+  attributeValueId String
+  Attribute        Attribute      @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  AttributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
+  Variant          Variant        @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@id([variantId, attributeId])
+  @@index([attributeId], map: "VariantAttribute_attributeId_fkey")
+  @@index([attributeValueId], map: "VariantAttribute_attributeValueId_fkey")
 }

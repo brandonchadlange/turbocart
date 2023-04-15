@@ -65,7 +65,7 @@ export default function Home() {
               <Text color="yellow">Sorted!</Text>
             </Title>
             <Text size={30} weight="bold" color="white" mt="lg" maw={500}>
-              Order your childrens meals up to two weeks in advance!
+              Order your childrens meals up to a week in advance!
             </Text>
             <Flex gap="md" mt={40}>
               <Button

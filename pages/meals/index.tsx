@@ -15,13 +15,11 @@ import {
   Flex,
   Grid,
   Group,
-  Image,
   MediaQuery,
   Modal,
   MultiSelect,
   NumberInput,
   Radio,
-  rem,
   SegmentedControl,
   Space,
   Stack,
@@ -33,7 +31,7 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { Student } from "@prisma/client";
-import { IconArrowLeft, IconArrowUp } from "@tabler/icons-react";
+import { IconTrash } from "@tabler/icons-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
@@ -232,10 +230,12 @@ const BasketForm = (props: BasketFormProps) => {
 
 const MealsPage = () => {
   const { fetchStudents, fetchBasketDetail, fetchDates } = queries;
+  const { removeFromBasket } = mutations;
   const menuSelect = useMenuSelect();
   const [selectedProduct, setSelectedProduct] = useState<Product>();
   const [drawerOpened, setDrawerOpened] = useState(false);
   const [detailsOpened, setDetailsOpened] = useState(false);
+
   const studentsQuery = useQuery("students", fetchStudents);
   const basketQuery = useQuery("basket", fetchBasketDetail);
   const datesQuery = useQuery("dates", fetchDates);
@@ -250,6 +250,11 @@ const MealsPage = () => {
   const dates = datesQuery.data || { options: [], dates: [] };
 
   const confirmAndPayDisabled = basket.length === 0;
+
+  const removeItemFromBasket = async (basketItemId: string) => {
+    await removeFromBasket(basketItemId);
+    basketQuery.refetch();
+  };
 
   return (
     <AppShell>
@@ -351,6 +356,7 @@ const MealsPage = () => {
                 <th>Period</th>
                 <th>Quantity</th>
                 <th>Cost</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -362,6 +368,11 @@ const MealsPage = () => {
                   <td>{item.menu.name}</td>
                   <td>{item.quantity}</td>
                   <td>R{item.product.priceInCents / 100}</td>
+                  <td>
+                    <ActionIcon onClick={() => removeItemFromBasket(item.id)}>
+                      <IconTrash />
+                    </ActionIcon>
+                  </td>
                 </tr>
               ))}
             </tbody>

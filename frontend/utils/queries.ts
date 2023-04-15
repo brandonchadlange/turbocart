@@ -1,4 +1,4 @@
-import { Basket, Student } from "@prisma/client";
+import { Basket, PaymentMethod, Student } from "@prisma/client";
 import axios from "axios";
 
 const applyFetch = <RES = any>(url: string) => {
@@ -21,6 +21,9 @@ const queries = {
   fetchBasketDetail: applyFetch<any[]>("/api/basket/detail"),
   fetchDates: applyFetch<any[]>("/api/date"),
   fetchOrder: applyFetch<any[]>("/api/order"),
+  fetchPaymentMethods: applyFetch<PaymentMethod[]>("/api/payment-method"),
+  fetchPaymentMethodConfig: (paymentMethodId: string) =>
+    applyFetch<any>("/api/payment-method/" + paymentMethodId)(),
 };
 
 export default queries;

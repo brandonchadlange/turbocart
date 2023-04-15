@@ -19,11 +19,20 @@ export default RouteHandler({
     const sessionId = getCookie("session", { req, res })?.toString()!;
     const merchantId = getMerchantId(req.headers);
 
+    const paymentMethod = (await dbInstance.paymentMethod.findFirst({
+      where: {
+        id: req.body.paymentMethodId,
+      },
+    })) as any;
+
+    paymentMethod.configuration = JSON.parse(paymentMethod.configuration);
+
     const basketSummary = await getBasketSummary(sessionId, products);
 
     // Make Payment
     const payment = await tryMakePayment({
       token: req.body.token,
+      secretKey: paymentMethod.configuration.secretKey as string,
       totalInCents: basketSummary.totalInCents + 1200,
     });
 
@@ -71,14 +80,19 @@ export default RouteHandler({
           studentLastName: basketItem.student.lastName,
           studentGrade: basketItem.student.grade,
           items: [],
+          fulfilled: false,
         });
 
         batch = orderBatches[orderBatches.length - 1];
       }
 
+      console.log(batch);
+
       const product = products.find(
         (product) => product.id === basketItem.productId
       )!;
+
+      console.log(product);
 
       batch.items!.push({
         pricePerItemInCents: product.priceInCents,
@@ -87,20 +101,27 @@ export default RouteHandler({
       });
     });
 
+    console.log("Creating Order");
+
+    const orderData = {
+      id: generateOrderId(),
+      createdAt: new Date(),
+      paymentId: payment.response.id,
+      quantity: basketSummary.totalItems,
+      serviceFeeInCents: 1200,
+      students: basketSummary.totalStudents,
+      totalInCents: basketSummary.totalInCents + 1200,
+      merchantId: merchantId,
+      totalBatches: orderBatches.length,
+      completeBatches: 0,
+      customerEmail: req.body.email,
+      customerFirstName: req.body.firstName,
+      customerLastName: req.body.lastName,
+    };
+
     // Construct Order
     const order = await dbInstance.order.create({
-      data: {
-        id: generateOrderId(),
-        createdAt: new Date(),
-        paymentId: payment.response.id,
-        quantity: basketSummary.totalItems,
-        serviceFeeInCents: 1200,
-        students: basketSummary.totalStudents,
-        totalInCents: basketSummary.totalInCents + 1200,
-        merchantId: merchantId,
-        totalBatches: orderBatches.length,
-        completeBatches: 0,
-      },
+      data: orderData,
     });
 
     console.log("Order created");
@@ -156,6 +177,7 @@ export default RouteHandler({
 
 const tryMakePayment = async (data: {
   token: string;
+  secretKey: string;
   totalInCents: number;
 }) => {
   try {
@@ -163,7 +185,7 @@ const tryMakePayment = async (data: {
       method: "POST",
       url: "https://online.yoco.com/v1/charges/",
       headers: {
-        "X-Auth-Secret-Key": "sk_test_960bfde0VBrLlpK098e4ffeb53e1", // TODO: BECOME ENV VARIABLE
+        "X-Auth-Secret-Key": data.secretKey,
       },
       data: {
         token: data.token,
