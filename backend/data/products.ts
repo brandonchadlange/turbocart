@@ -15,6 +15,7 @@ type OptionValue = {
 export class Product {
   id: string;
   name: string;
+  description: string = "";
   priceInCents: number;
   options: Option[] = [];
   variants: Product[] = [];
@@ -46,6 +47,10 @@ export class Product {
 
   addRecipe(products: Product[]) {
     this.recipe.push(...products);
+  }
+
+  addDescription(description: string) {
+    this.description = description;
   }
 }
 
@@ -103,10 +108,13 @@ export const ham_cheese_roll = productFactory.createProduct(
   "Ham & Cheese",
   3000
 );
+ham_cheese_roll.addDescription("With lettuce, tomato & cucumber");
+
 export const chicken_mayo_roll = productFactory.createProduct(
   "Chicken Mayo",
   3000
 );
+chicken_mayo_roll.addDescription("With lettuce, tomato & cucumber");
 
 // WRAPS
 export const chicken_mayo_wrap = productFactory.createProduct(
@@ -203,9 +211,16 @@ export const chicken_honey_mustard_salad = productFactory.createProduct(
   "Chicken Honey Mustard",
   3200
 );
+chicken_honey_mustard_salad.addDescription(
+  "Chicken, Lettuce, Cucumber, Tomato, Red Onion & Honey Mustard Mayo"
+);
+
 export const bacon_feta_salad = productFactory.createProduct(
   "Bacon & Feta",
   3400
+);
+bacon_feta_salad.addDescription(
+  "Bacon Bits, Feta, Lettuce, Cucumber, Tomato & Red Onion"
 );
 
 // COLD DRINKS
@@ -258,12 +273,17 @@ const fresh_fruit = productFactory.createProductVariant("Fresh Fruit", 0);
 
 export const cheese_box = productFactory.createProduct("Cheese Box", 4800);
 cheese_box.addRecipe([cheese_tomato_sandwich, cheese_wedge, fruit_juice]);
+cheese_box.addDescription(
+  "Toasted Cheese & Tomato Sandwich, Cheese Wedge & Fruit Juice"
+);
 
 export const meat_box = productFactory.createProduct("Meat Box", 5500);
 meat_box.addRecipe([boerewors_roll, dry_wors, fruit_juice]);
+meat_box.addDescription("Boerewors Roll, Dry Wors & Fruit Juice");
 
 export const chicken_box = productFactory.createProduct("Chicken Box", 5800);
 chicken_box.addRecipe([chicken_burger, fresh_fruit, fruit_juice]);
+chicken_box.addDescription("Chicken Burger, Fresh Fruit & Fruit Juice");
 
 export default [
   egg_bun,

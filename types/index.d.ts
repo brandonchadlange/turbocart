@@ -19,6 +19,7 @@ declare type OptionValue = {
 declare type Product = {
   id: string;
   name: string;
+  description: string;
   priceInCents: number;
   options?: Option[];
   variants: Product[];

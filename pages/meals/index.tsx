@@ -114,6 +114,9 @@ const BasketForm = (props: BasketFormProps) => {
   return (
     <form onSubmit={form.onSubmit(onFormSubmit)} style={{ height: "100%" }}>
       <Stack>
+        <Text color="dark" size="sm">
+          {props.product?.description}
+        </Text>
         <div>
           <SegmentedControl
             size="sm"
@@ -318,6 +321,9 @@ const MealsPage = () => {
                             className="menu-item"
                           >
                             <Title size={14}>{item.name}</Title>
+                            <Text color="dark" size="xs">
+                              {item?.description}
+                            </Text>
                             <Text size="sm" color="dimmed">
                               R{item.priceInCents / 100}
                             </Text>
