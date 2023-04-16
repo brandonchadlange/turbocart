@@ -61,6 +61,11 @@ grill_category.addProduct(products.boerewors_roll);
 grill_category.addProduct(products.boerewors_roll_chips);
 grill_category.addProduct(products.burger);
 grill_category.addProduct(products.burger_chips);
+grill_category.addProduct(products.chicken_strips);
+grill_category.addProduct(products.chicken_strips_chips);
+grill_category.addProduct(products.chicken_wings);
+grill_category.addProduct(products.chicken_wings_chips);
+grill_category.addProduct(products.chips);
 
 const salad_category = new MenuCategory("Salad");
 salad_category.addProduct(products.chicken_honey_mustard_salad);

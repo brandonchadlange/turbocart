@@ -101,7 +101,7 @@ export const bacon_egg_cheese_sandwich = productFactory.createProduct(
 // ROLLS
 export const ham_cheese_roll = productFactory.createProduct(
   "Ham & Cheese",
-  3600
+  3000
 );
 export const chicken_mayo_roll = productFactory.createProduct(
   "Chicken Mayo",
@@ -122,8 +122,14 @@ export const blt_cheese_wrap = productFactory.createProduct("BLT Cheese", 3600);
 // GRILL
 export const small_chips = productFactory.createProductVariant(
   "Small Chips",
+  1000
+);
+
+export const medium_chips = productFactory.createProductVariant(
+  "Medium Chips",
   1500
 );
+
 export const large_chips = productFactory.createProductVariant(
   "Large Chips",
   2500
@@ -135,7 +141,7 @@ export const boerewors_roll = productFactory.createProduct(
 );
 export const boerewors_roll_chips = productFactory.createProduct(
   "Boerewors Roll & Chips",
-  4500
+  4000
 );
 
 boerewors_roll_chips.addRecipe([boerewors_roll, small_chips]);
@@ -146,7 +152,7 @@ const chicken_burger = productFactory.createProductVariant(
   3800
 );
 
-export const burger = productFactory.createProduct("Burger", 3000);
+export const burger = productFactory.createProduct("Burger", 3800);
 burger.addVariants([beef_burger, chicken_burger]);
 
 export const beef_burger_chips = productFactory.createProductVariant(
@@ -157,13 +163,13 @@ beef_burger_chips.addRecipe([beef_burger, small_chips]);
 
 export const chicken_burger_chips = productFactory.createProductVariant(
   "Chicken Burger & Chips",
-  5300
+  4800
 );
 chicken_burger_chips.addRecipe([chicken_burger, small_chips]);
 
 export const burger_chips = productFactory.createProduct(
   "Burger & Chips",
-  5300
+  4800
 );
 
 burger_chips.addVariants([beef_burger_chips, chicken_burger_chips]);
@@ -173,8 +179,8 @@ export const chicken_strips = productFactory.createProduct(
   3400
 );
 export const chicken_strips_chips = productFactory.createProduct(
-  "Chicken Strips",
-  4800
+  "Chicken Strips & Chips",
+  4400
 );
 chicken_strips_chips.addRecipe([chicken_strips, small_chips]);
 
@@ -184,22 +190,22 @@ export const chicken_wings = productFactory.createProduct(
 );
 export const chicken_wings_chips = productFactory.createProduct(
   "Chicken Wings & Chips",
-  4800
+  4400
 );
 chicken_wings_chips.addRecipe([chicken_wings, small_chips]);
 
-export const chips = productFactory.createProduct("Chips", 1500);
+export const chips = productFactory.createProduct("Chips", 2000);
 
-chips.addVariants([small_chips, large_chips]);
+chips.addVariants([small_chips, medium_chips, large_chips]);
 
 // SALAD
 export const chicken_honey_mustard_salad = productFactory.createProduct(
   "Chicken Honey Mustard",
-  3000
+  3200
 );
 export const bacon_feta_salad = productFactory.createProduct(
   "Bacon & Feta",
-  3200
+  3400
 );
 
 // COLD DRINKS
@@ -240,7 +246,7 @@ export const sports_drink = productFactory.createProduct("Sports Drink", 1600);
 export const crisps = productFactory.createProduct("Crisps", 1000);
 export const doritos = productFactory.createProduct("Doritos", 1200);
 export const energy_bar = productFactory.createProduct("Energy Bar", 1800);
-export const wine_gums = productFactory.createProduct("Wine Gums", 1200);
+export const wine_gums = productFactory.createProduct("Wine Gums", 1400);
 export const popcorn = productFactory.createProduct("Popcorn", 1200);
 export const chocolate = productFactory.createProduct("Chocolate", 1500);
 // export const muffin = productFactory.createProduct("Muffin Giant Filled", 2500);
@@ -257,7 +263,7 @@ export const meat_box = productFactory.createProduct("Meat Box", 5500);
 meat_box.addRecipe([boerewors_roll, dry_wors, fruit_juice]);
 
 export const chicken_box = productFactory.createProduct("Chicken Box", 5800);
-chicken_box.addRecipe([chicken_burger, fresh_fruit]);
+chicken_box.addRecipe([chicken_burger, fresh_fruit, fruit_juice]);
 
 export default [
   egg_bun,
@@ -286,6 +292,7 @@ export default [
   chicken_wings,
   chicken_wings_chips,
   small_chips,
+  medium_chips,
   large_chips,
   chips,
   chicken_honey_mustard_salad,
