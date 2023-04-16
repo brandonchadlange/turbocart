@@ -227,7 +227,7 @@ export const grape_tizer = productFactory.createProductVariant(
   "Grape Tizer",
   1600
 );
-export const tizer = productFactory.createProduct("Tizer", 1600);
+export const tizer = productFactory.createProduct("Tizer", 2000);
 tizer.addVariants([apple_tizer, grape_tizer]);
 
 const coke = productFactory.createProductVariant("Coke", 1600);
@@ -240,7 +240,7 @@ soft_drinks.addVariants([coke, fanta, sprite]);
 export const iced_tea = productFactory.createProduct("Iced Tea", 1600);
 export const fruit_juice = productFactory.createProduct("Fruit Juice", 1600);
 export const juice_box = productFactory.createProduct("Juice Box", 1200);
-export const sports_drink = productFactory.createProduct("Sports Drink", 1600);
+export const sports_drink = productFactory.createProduct("Sports Drink", 1800);
 
 // SNACKS
 export const crisps = productFactory.createProduct("Crisps", 1000);
