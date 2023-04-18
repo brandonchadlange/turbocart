@@ -80,7 +80,7 @@ const ConfirmationPage = () => {
     });
 
     yoco.showPopup({
-      amountInCents: basketSummary.totalInCents + 1200,
+      amountInCents: basketSummary.totalInCents + 800,
       currency: "ZAR",
       name: "Checkout",
       description: "Awesome description",

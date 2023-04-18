@@ -20,6 +20,7 @@ export default RouteHandler({
         "5L",
         "6M",
         "6S",
+        "7L",
         "7S",
         "7V",
         "8 - 12 (pickup)",

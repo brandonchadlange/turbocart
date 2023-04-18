@@ -33,7 +33,7 @@ export default RouteHandler({
     const payment = await tryMakePayment({
       token: req.body.token,
       secretKey: paymentMethod.configuration.secretKey as string,
-      totalInCents: basketSummary.totalInCents + 1200,
+      totalInCents: basketSummary.totalInCents + 800,
     });
 
     if (!payment.success) {
@@ -108,9 +108,9 @@ export default RouteHandler({
       createdAt: new Date(),
       paymentId: payment.response.id,
       quantity: basketSummary.totalItems,
-      serviceFeeInCents: 1200,
+      serviceFeeInCents: 800,
       students: basketSummary.totalStudents,
-      totalInCents: basketSummary.totalInCents + 1200,
+      totalInCents: basketSummary.totalInCents + 800,
       merchantId: merchantId,
       totalBatches: orderBatches.length,
       completeBatches: 0,
