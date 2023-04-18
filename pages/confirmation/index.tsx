@@ -177,7 +177,7 @@ const ConfirmationPage = () => {
                         <Text>Service fee:</Text>
                       </td>
                       <td style={{ textAlign: "right" }}>
-                        <Text>R12</Text>
+                        <Text>R8</Text>
                       </td>
                     </tr>
                     <tr>
