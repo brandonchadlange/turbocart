@@ -186,7 +186,7 @@ const ConfirmationPage = () => {
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <Text weight="bold">
-                          R{basketSummary.totalInCents / 100 + 12}
+                          R{basketSummary.totalInCents / 100 + 8}
                         </Text>
                       </td>
                     </tr>
