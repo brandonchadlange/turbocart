@@ -49,9 +49,14 @@ const BasketForm = (props: BasketFormProps) => {
   const queryClient = useQueryClient();
   const { addToBasket } = mutations;
   const { product, students, selectedMenu, dates, closeDrawer } = props;
-  const [dateType, setDateType] = useState(dates.options[0].value);
   const [selectedDateIds, setSelectedDateIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const selectedDate = dates.dates.filter((e: any) => e.status === "today");
+    console.log(selectedDate);
+    setSelectedDateIds([...selectedDate.map((e: any) => e.dateCode)]);
+  }, []);
 
   const showVariants = product?.variants!.length! > 0 || false;
 
@@ -98,18 +103,9 @@ const BasketForm = (props: BasketFormProps) => {
     queryClient.fetchQuery("basket");
   };
 
-  const isAddToCartDisabled = Object.values(form.values.quantity).every(
-    (e: any) => e === 0
-  );
-
-  useEffect(() => {
-    if (dateType !== "custom") {
-      setSelectedDateIds([dateType]);
-      return;
-    }
-
-    setSelectedDateIds([]);
-  }, [dateType]);
+  const isAddToCartDisabled =
+    Object.values(form.values.quantity).every((e: any) => e === 0) ||
+    selectedDateIds.length === 0;
 
   return (
     <form onSubmit={form.onSubmit(onFormSubmit)} style={{ height: "100%" }}>
@@ -117,31 +113,18 @@ const BasketForm = (props: BasketFormProps) => {
         <Text color="dark" size="sm">
           {props.product?.description}
         </Text>
-        <div>
-          <SegmentedControl
-            size="sm"
-            value={dateType}
-            onChange={(e) => setDateType(e)}
-            data={dates.options.map((e: any) => ({
-              label: e.label,
-              value: e.value,
-            }))}
-          />
-        </div>
-        {dateType === "custom" && (
-          <MultiSelect
-            dropdownPosition="bottom"
-            label="Dates"
-            placeholder="Select date"
-            value={selectedDateIds}
-            onChange={(e) => setSelectedDateIds(e)}
-            data={dates.dates.map((date: any) => ({
-              value: date.dateCode,
-              label: date.weekDay + " " + date.day,
-              disabled: date.disabled,
-            }))}
-          />
-        )}
+        <MultiSelect
+          dropdownPosition="bottom"
+          label="Dates"
+          placeholder="Select date"
+          value={selectedDateIds}
+          onChange={(e) => setSelectedDateIds(e)}
+          data={dates.dates.map((date: any) => ({
+            value: date.dateCode,
+            label: date.weekDay + " " + date.day,
+            disabled: date.status === "complete",
+          }))}
+        />
         {showVariants && (
           <Radio.Group
             label="Choose"
