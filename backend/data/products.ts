@@ -285,6 +285,11 @@ export const chicken_box = productFactory.createProduct("Chicken Box", 5800);
 chicken_box.addRecipe([chicken_burger, fresh_fruit, fruit_juice]);
 chicken_box.addDescription("Chicken Burger, Fresh Fruit & Fruit Juice");
 
+export const wacky_wednesday = productFactory.createProduct(
+  "Wacky Wednesday",
+  3800
+);
+
 export default [
   egg_bun,
   bacon_egg_bun,

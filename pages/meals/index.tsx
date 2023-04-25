@@ -54,7 +54,6 @@ const BasketForm = (props: BasketFormProps) => {
 
   useEffect(() => {
     const selectedDate = dates.dates.filter((e: any) => e.status === "today");
-    console.log(selectedDate);
     setSelectedDateIds([...selectedDate.map((e: any) => e.dateCode)]);
   }, []);
 

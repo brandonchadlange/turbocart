@@ -57,6 +57,7 @@ wraps_category.addProduct(products.sweet_chilli_chickent_wrap);
 wraps_category.addProduct(products.blt_cheese_wrap);
 
 const grill_category = new MenuCategory("Grill");
+grill_category.addProduct(products.wacky_wednesday);
 grill_category.addProduct(products.boerewors_roll);
 grill_category.addProduct(products.boerewors_roll_chips);
 grill_category.addProduct(products.burger);
