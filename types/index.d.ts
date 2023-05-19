@@ -22,18 +22,25 @@ declare type Product = {
   description: string;
   priceInCents: number;
   options?: Option[];
-  variants: Product[];
+  // variants: Product[];
+};
+
+declare type Listing = {
+  id: string;
+  name: string;
+  description: string;
+  priceInCents: number;
 };
 
 declare type Category = {
+  id: string;
   name: string;
-  items: Product[];
+  items: Listing[];
 };
 
 declare type Menu = {
   id: string;
   name: string;
-  slug: string;
   categories: Category[];
 };
 
@@ -44,10 +51,11 @@ declare type AddToBasketRequest = {
   options: any;
   quantity: any;
   variant?: string;
+  variantId: string;
 };
 
 type SummaryItem = {
-  product: Product;
+  variant: any;
   quantity: number;
   totalInCents: number;
 };

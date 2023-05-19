@@ -3,6 +3,7 @@ import type { AppProps } from "next/app";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { StrategyStateProvider } from "@/frontend/providers/strategy";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,16 +16,18 @@ const queryClient = new QueryClient({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <MantineProvider
-        withGlobalStyles
-        withNormalizeCSS
-        theme={{
-          colorScheme: "light",
-        }}
-      >
-        <Notifications position="top-left" />
-        <Component {...pageProps} />
-      </MantineProvider>
+      <StrategyStateProvider>
+        <MantineProvider
+          withGlobalStyles
+          withNormalizeCSS
+          theme={{
+            colorScheme: "light",
+          }}
+        >
+          <Notifications position="top-left" />
+          <Component {...pageProps} />
+        </MantineProvider>
+      </StrategyStateProvider>
     </QueryClientProvider>
   );
 }

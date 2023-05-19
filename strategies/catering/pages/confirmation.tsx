@@ -1,21 +1,27 @@
 import Steps from "@/components/steps";
 import mutations from "@/frontend/utils/mutations";
 import queries from "@/frontend/utils/queries";
+import { userDetailsSchema } from "@/frontend/utils/validation";
+import makePaymentWithYoco from "@/payment-providers/yoco";
 import {
   AppShell,
   Button,
   Card,
+  Checkbox,
   Container,
   Divider,
+  Flex,
   Grid,
+  LoadingOverlay,
   MediaQuery,
   Stack,
   Table,
   Text,
   TextInput,
+  Textarea,
   Title,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -30,13 +36,32 @@ const attachYocoScript = () => {
   });
 };
 
+type UserDetailsForm = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  notes: string;
+  rememberDetails: boolean;
+};
+
 const ConfirmationPage = () => {
+  const [loading, setLoading] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState<any>();
   const router = useRouter();
 
-  const form = useForm();
+  const form = useForm<UserDetailsForm>({
+    initialValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      notes: "",
+      rememberDetails: false,
+    },
+    validate: zodResolver(userDetailsSchema),
+  });
 
   const {
+    fetchSessionDetail,
     fetchBasketSummary,
     fetchBasketDetail,
     fetchPaymentMethods,
@@ -55,10 +80,26 @@ const ConfirmationPage = () => {
     totalStudents: 0,
   };
 
+  const getFormData = async () => {
+    const sessionDetail = await fetchSessionDetail();
+
+    form.setValues({
+      firstName: sessionDetail.customerFirstName,
+      lastName: sessionDetail.customerLastName,
+      email: sessionDetail.customerEmail,
+    });
+
+    form.setFieldValue("rememberDetails", sessionDetail.rememberDetails);
+  };
+
   const fetchPaymentMethod = async (paymentMethodId: string) => {
     const response = await fetchPaymentMethodConfig(paymentMethodId);
     setPaymentMethod(response);
   };
+
+  useEffect(() => {
+    getFormData();
+  }, []);
 
   useEffect(() => {
     if (paymentMethodsQuery.isLoading) return;
@@ -70,44 +111,66 @@ const ConfirmationPage = () => {
 
   const basketDetail = basketDetailQuery.data || [];
 
+  const tryPlaceOrder = async (data: any) => {
+    setLoading(true);
+
+    try {
+      const { id: orderId } = await placeOrder({
+        token: data.token,
+        paymentMethodId: paymentMethod.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        notes: data.notes,
+        rememberDetails: data.rememberDetails,
+      });
+
+      router.push("/order-success?orderId=" + orderId);
+      setLoading(false);
+    } catch (err: any) {
+      const {
+        data: { data },
+        status,
+      } = err.response;
+
+      setLoading(false);
+
+      if (status === 424) {
+        notifications.show({
+          title: "Failed to place order!",
+          message: data.displayMessage,
+          color: "red",
+          autoClose: 15000,
+        });
+
+        return;
+      }
+
+      notifications.show({
+        title: "Failed to place order!",
+        message: "An error has occured...",
+        color: "red",
+      });
+    }
+  };
+
   const onFormSubmit = async (data: any) => {
-    const { firstName, lastName, email } = data;
     await attachYocoScript();
 
-    // @ts-ignore
-    const yoco = new window.YocoSDK({
-      publicKey: paymentMethod.configuration.publicKey,
-    });
+    try {
+      const result = await makePaymentWithYoco({
+        publicKey: paymentMethod.configuration.publicKey,
+        amountInCents: basketSummary.totalInCents + 800,
+      });
 
-    yoco.showPopup({
-      amountInCents: basketSummary.totalInCents + 800,
-      currency: "ZAR",
-      name: "Checkout",
-      description: "Awesome description",
-      callback: async function (result: any) {
-        if (result.error) {
-          const errorMessage = result.error.message;
-          alert("error occured: " + errorMessage);
-        } else {
-          try {
-            await placeOrder(
-              result.id,
-              paymentMethod.id,
-              firstName,
-              lastName,
-              email
-            );
-            router.push("/order-success");
-          } catch (err) {
-            notifications.show({
-              title: "Failed to create order!",
-              message: "Please try again later.",
-              color: "red",
-            });
-          }
-        }
-      },
-    });
+      tryPlaceOrder({
+        token: result.id,
+        ...data,
+      });
+    } catch (err: any) {
+      const errorMessage = err.message;
+      alert("error occured: " + errorMessage);
+    }
   };
 
   return (
@@ -140,6 +203,18 @@ const ConfirmationPage = () => {
                       {...form.getInputProps("email")}
                       label="Email address"
                     />
+                    <Textarea {...form.getInputProps("notes")} label="Notes" />
+                    <Flex>
+                      <Checkbox
+                        my="sm"
+                        label="Remember me"
+                        description="Save your details for a faster checkout"
+                        {...form.getInputProps("rememberDetails", {
+                          type: "checkbox",
+                        })}
+                      />
+                      {/* <Tooltip label=""></Tooltip> */}
+                    </Flex>
                     <Button type="submit" color="yellow">
                       Pay now
                     </Button>
@@ -159,8 +234,8 @@ const ConfirmationPage = () => {
                   </thead>
                   <tbody>
                     {basketSummary.items.map((item) => (
-                      <tr key={item.product.id}>
-                        <td>{item.product.name}</td>
+                      <tr key={item.variant.id}>
+                        <td>{item.variant.name}</td>
                         <td>{item.quantity}</td>
                         <td style={{ textAlign: "right" }}>
                           R{item.totalInCents / 100}
@@ -212,11 +287,11 @@ const ConfirmationPage = () => {
                       {basketDetail.map((item) => (
                         <tr key={item.id}>
                           <td>{item.student.firstName}</td>
-                          <td>{item.product.name}</td>
+                          <td>{item.variant.name}</td>
                           <td>{item.dateId}</td>
                           <td>{item.menu.name}</td>
                           <td>{item.quantity}</td>
-                          <td>R{item.product.priceInCents / 100}</td>
+                          <td>R{item.variant.Listing.priceInCents / 100}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -227,6 +302,7 @@ const ConfirmationPage = () => {
           </Grid>
         </main>
       </Container>
+      <LoadingOverlay visible={loading} overlayBlur={2} />
     </AppShell>
   );
 };

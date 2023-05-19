@@ -1,5 +1,6 @@
 import MenuSelect, { useMenuSelect } from "@/components/menu-select";
 import Steps from "@/components/steps";
+import useEventEmitter from "@/frontend/utils/event-emitter";
 import mutations from "@/frontend/utils/mutations";
 import queries from "@/frontend/utils/queries";
 import {
@@ -8,7 +9,6 @@ import {
   AppShell,
   Button,
   Card,
-  Checkbox,
   Container,
   Divider,
   Drawer,
@@ -20,7 +20,6 @@ import {
   MultiSelect,
   NumberInput,
   Radio,
-  SegmentedControl,
   Space,
   Stack,
   Table,
@@ -32,47 +31,49 @@ import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { Student } from "@prisma/client";
-import { IconShoppingCart, IconTrash } from "@tabler/icons-react";
+import { IconTrash } from "@tabler/icons-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 
 type BasketFormProps = {
   students: Student[];
-  product?: Product;
+  listing?: Listing;
   dates: any;
   closeDrawer: () => void;
-  selectedMenu?: Menu;
+  selectedMenuId: string;
 };
 
 const BasketForm = (props: BasketFormProps) => {
   const queryClient = useQueryClient();
   const { addToBasket } = mutations;
-  const { product, students, selectedMenu, dates, closeDrawer } = props;
+  const { listing, students, selectedMenuId, dates, closeDrawer } = props;
   const [selectedDateIds, setSelectedDateIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const listingDetailQuery = useQuery(
+    ["listing-detail", listing],
+    () => queries.fetchListing(listing!.id),
+    {
+      enabled: listing !== undefined,
+    }
+  );
+
+  const listingDetail = listingDetailQuery.data;
 
   useEffect(() => {
     const selectedDate = dates.dates.filter((e: any) => e.status === "today");
     setSelectedDateIds([...selectedDate.map((e: any) => e.dateCode)]);
   }, []);
 
-  const showVariants = product?.variants!.length! > 0 || false;
-
   const initialValues: any = {
-    productId: product?.id,
-    menuId: selectedMenu?.id,
+    productId: listing?.id,
+    variantId: "",
+    menuId: selectedMenuId,
     dateIdList: selectedDateIds,
     options: {},
     quantity: {},
-    variant: showVariants ? product?.variants[0].id : null,
   };
-
-  product?.options?.forEach((option) => {
-    if (option.type === "single") {
-      initialValues.options[option.value] = option.values[0].value;
-    }
-  });
 
   students.forEach((student) => {
     initialValues.quantity[student.id] = 0;
@@ -82,13 +83,17 @@ const BasketForm = (props: BasketFormProps) => {
     initialValues,
   });
 
-  const onFormSubmit = async (data: AddToBasketRequest) => {
+  useEffect(() => {
+    if (listingDetail === undefined) {
+      return;
+    }
+
+    form.setFieldValue("variantId", listingDetail.variants[0]?.id || "");
+  }, [listingDetail]);
+
+  const onFormSubmit = async (data: any) => {
     setLoading(true);
     data.dateIdList = selectedDateIds;
-
-    if (data.variant) {
-      data.productId = data.variant;
-    }
 
     await addToBasket(data);
 
@@ -102,6 +107,8 @@ const BasketForm = (props: BasketFormProps) => {
     queryClient.fetchQuery("basket");
   };
 
+  const hasMultipleVariants = listingDetail?.variants.length > 1;
+
   const isAddToCartDisabled =
     Object.values(form.values.quantity).every((e: any) => e === 0) ||
     selectedDateIds.length === 0;
@@ -110,7 +117,7 @@ const BasketForm = (props: BasketFormProps) => {
     <form onSubmit={form.onSubmit(onFormSubmit)} style={{ height: "100%" }}>
       <Stack>
         <Text color="dark" size="sm">
-          {props.product?.description}
+          {props.listing?.description}
         </Text>
         <MultiSelect
           dropdownPosition="bottom"
@@ -124,15 +131,14 @@ const BasketForm = (props: BasketFormProps) => {
             disabled: date.status === "complete",
           }))}
         />
-        {showVariants && (
+        {hasMultipleVariants && (
           <Radio.Group
-            label="Choose"
-            name="variant"
+            label="Options"
             size="sm"
-            {...form.getInputProps("variant")}
+            {...form.getInputProps("variantId")}
           >
             <Group>
-              {product?.variants.map((variant) => (
+              {listingDetail?.variants.map((variant: any) => (
                 <Radio
                   key={variant.id}
                   value={variant.id}
@@ -142,46 +148,6 @@ const BasketForm = (props: BasketFormProps) => {
             </Group>
           </Radio.Group>
         )}
-        {product?.options?.map((option) => (
-          <div key={option.value}>
-            {option.type === "single" && (
-              <Radio.Group
-                label={option.label}
-                name={option.value}
-                size="sm"
-                {...form.getInputProps("options." + option.value)}
-              >
-                <Group>
-                  {option.values.map((value) => (
-                    <Radio
-                      key={value.value}
-                      value={value.value}
-                      label={value.label}
-                    />
-                  ))}
-                </Group>
-              </Radio.Group>
-            )}
-            {option.type === "multiple" && (
-              <Checkbox.Group
-                label={option.label}
-                size="sm"
-                {...form.getInputProps("options." + option.value)}
-              >
-                <Group>
-                  {option.values.map((value) => (
-                    <Checkbox
-                      size="xs"
-                      key={value.value}
-                      value={value.value}
-                      label={value.label}
-                    />
-                  ))}
-                </Group>
-              </Checkbox.Group>
-            )}
-          </div>
-        ))}
       </Stack>
       <Stack spacing="xs" mt="xl">
         {students.map((student) => (
@@ -215,11 +181,22 @@ const BasketForm = (props: BasketFormProps) => {
 };
 
 const MealsPage = () => {
-  const { height, width } = useViewportSize();
+  const menuFilter = defineFilter("menu");
+  const categoryFilter = defineFilter("category");
+  console.log(menuFilter.values);
+  console.log(categoryFilter.values);
+
+  const eventEmitter = useEventEmitter();
+
+  eventEmitter.on("menu-change", (menu: Menu) => {
+    console.log(menu);
+  });
+
+  const { width } = useViewportSize();
   const { fetchStudents, fetchBasketDetail, fetchDates } = queries;
   const { removeFromBasket } = mutations;
-  const menuSelect = useMenuSelect();
-  const [selectedProduct, setSelectedProduct] = useState<Product>();
+  const menuSelect = useMenuSelect({ eventEmitter });
+  const [selectedListing, setSelectedListing] = useState<Listing>();
   const [drawerOpened, setDrawerOpened] = useState(false);
   const [detailsOpened, setDetailsOpened] = useState(false);
 
@@ -227,8 +204,8 @@ const MealsPage = () => {
   const basketQuery = useQuery("basket", fetchBasketDetail);
   const datesQuery = useQuery("dates", fetchDates);
 
-  const selectItem = async (product: Product) => {
-    setSelectedProduct(product);
+  const selectItem = async (listing: Listing) => {
+    setSelectedListing(listing);
     setDrawerOpened(true);
   };
 
@@ -289,13 +266,13 @@ const MealsPage = () => {
             <Grid.Col span={2}>
               <Space h={20} />
               <Stack spacing="lg">
-                {menuSelect.selectedMenu?.categories.map((category) => (
-                  <div key={category.name}>
+                {menuSelect.selectedMenu.map((category) => (
+                  <div key={category.id}>
                     <Title mb="xs" size={18}>
                       {category.name}
                     </Title>
                     <Grid columns={3}>
-                      {category.items.map((item) => (
+                      {category.items.map((item: any) => (
                         <Grid.Col md={1} key={item.id}>
                           <Card
                             withBorder
@@ -304,7 +281,7 @@ const MealsPage = () => {
                           >
                             <Title size={14}>{item.name}</Title>
                             <Text color="dark" size="xs">
-                              {item?.description}
+                              {item.description}
                             </Text>
                             <Text size="sm" color="dimmed">
                               R{item.priceInCents / 100}
@@ -327,18 +304,18 @@ const MealsPage = () => {
         onClose={() => setDrawerOpened(false)}
         title={
           <>
-            <Title size={16}>{selectedProduct?.name}</Title>
+            <Title size={16}>{selectedListing?.name}</Title>
             <Text size="sm" color="dimmed">
-              R{selectedProduct?.priceInCents! / 100}
+              R{selectedListing?.priceInCents! / 100}
             </Text>
           </>
         }
       >
         <BasketForm
           students={students}
-          product={selectedProduct}
+          listing={selectedListing}
           closeDrawer={() => setDrawerOpened(false)}
-          selectedMenu={menuSelect.selectedMenu}
+          selectedMenuId={menuSelect.selectedMenuId}
           dates={dates}
         />
       </Drawer>
@@ -368,11 +345,11 @@ const MealsPage = () => {
                 {basket.map((item) => (
                   <tr key={item.id}>
                     <td>{item.student.firstName}</td>
-                    <td>{item.product.name}</td>
+                    <td>{item.variant.name}</td>
                     <td>{item.dateId}</td>
                     <td>{item.menu.name}</td>
                     <td>{item.quantity}</td>
-                    <td>R{item.product.priceInCents / 100}</td>
+                    <td>R{item.variant.Listing.priceInCents / 100}</td>
                     <td>
                       <ActionIcon onClick={() => removeItemFromBasket(item.id)}>
                         <IconTrash />
@@ -400,11 +377,11 @@ const MealsPage = () => {
                 </Flex>
                 <Flex justify="space-between" mt="sm">
                   <Text>
-                    {item.quantity} x {item.product.name} @ R
-                    {item.product.priceInCents / 100}
+                    {item.quantity} x {item.variant.name} @ R
+                    {item.variant.Listing.priceInCents / 100}
                   </Text>
                   <Text>
-                    R{(item.product.priceInCents / 100) * item.quantity}
+                    R{(item.variant.Listing.priceInCents / 100) * item.quantity}
                   </Text>
                 </Flex>
               </Card>
@@ -436,5 +413,15 @@ const MealsPage = () => {
     </AppShell>
   );
 };
+
+function defineFilter(filterId: string) {
+  const filterQuery = useQuery(["filter", filterId], () =>
+    queries.fetchFilterValues(filterId)
+  );
+
+  return {
+    values: filterQuery.data || [],
+  };
+}
 
 export default MealsPage;

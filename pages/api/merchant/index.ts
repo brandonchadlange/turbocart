@@ -6,12 +6,12 @@ export default RouteHandler({
   async GET(req, res) {
     const merchantId = getMerchantId(req.headers);
 
-    const menuList = await dbInstance.menu.findMany({
+    const merchantDetail = await dbInstance.merchant.findFirst({
       where: {
-        merchantId,
+        id: merchantId,
       },
     });
 
-    res.status(200).send(menuList);
+    res.status(200).send(merchantDetail);
   },
 });

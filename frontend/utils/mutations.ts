@@ -44,22 +44,26 @@ const mutations = {
       method: "DELETE",
       url: "/api/basket/item/" + basketItemId,
     }),
-  placeOrder: (
-    token: string,
-    paymentMethodId: string,
-    firstName: string,
-    lastName: string,
-    email: string
-  ) =>
+  placeOrder: (data: {
+    token: string;
+    paymentMethodId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    notes: string;
+    rememberDetails: boolean;
+  }) =>
     runMutation({
       method: "POST",
       url: "/api/order",
       data: {
-        token,
-        paymentMethodId,
-        firstName,
-        lastName,
-        email,
+        token: data.token,
+        paymentMethodId: data.paymentMethodId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        notes: data.notes,
+        rememberDetails: data.rememberDetails,
       },
     }),
 };

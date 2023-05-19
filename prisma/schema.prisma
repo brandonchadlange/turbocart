@@ -10,9 +10,12 @@ datasource db {
 model Merchant {
   id             String          @id
   name           String
-  yocoPublicKey  String
-  yocoPrivateKey String
   clerkId        String          @default("")
+  strategy       String          @default("")
+  Category       Category[]
+  Filter         Filter[]
+  Listing        Listing[]
+  Menu           Menu[]
   orders         Order[]
   paymentMethods PaymentMethod[]
 }
@@ -20,20 +23,26 @@ model Merchant {
 model PaymentMethod {
   id            String   @id @default(cuid())
   merchantId    String
-  merchant      Merchant @relation(fields: [merchantId], references: [id])
   name          String
   description   String
   provider      String
   enabled       Boolean
   configuration String
+  merchant      Merchant @relation(fields: [merchantId], references: [id])
+
+  @@index([merchantId], map: "PaymentMethod_merchantId_fkey")
 }
 
 model Session {
-  id         String    @id @default(cuid())
-  merchantId String
-  createdAt  DateTime
-  basket     Basket[]
-  Student    Student[]
+  id                String    @id @default(cuid())
+  merchantId        String
+  createdAt         DateTime
+  customerEmail     String    @default("")
+  customerFirstName String    @default("")
+  customerLastName  String    @default("")
+  rememberDetails   Boolean   @default(false)
+  basket            Basket[]
+  Student           Student[]
 }
 
 model Basket {
@@ -44,6 +53,7 @@ model Basket {
   menuId    String
   dateId    String
   quantity  Int
+  variantId String
   session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
@@ -65,6 +75,8 @@ model Order {
   completeBatches   Int          @default(0)
   totalBatches      Int          @default(0)
   serviceFeeInCents Int          @default(0)
+  isComplete        Boolean      @default(false)
+  notes             String?
   merchant          Merchant     @relation(fields: [merchantId], references: [id])
   batches           OrderBatch[]
   items             OrderItem[]
@@ -95,6 +107,7 @@ model OrderItem {
   pricePerItemInCents Int
   orderBatchId        String
   packed              Boolean    @default(false)
+  variantId           String
   batch               OrderBatch @relation(fields: [orderBatchId], references: [id])
   order               Order      @relation(fields: [orderId], references: [id])
 
@@ -114,75 +127,101 @@ model Student {
   @@index([sessionId], map: "Student_sessionId_fkey")
 }
 
-model Attribute {
-  id               String             @id @default(cuid())
-  name             String
-  AttributeValue   AttributeValue[]
-  VariantAttribute VariantAttribute[]
+model Category {
+  id              String            @id @default(cuid())
+  merchantId      String
+  name            String
+  Merchant        Merchant          @relation(fields: [merchantId], references: [id])
+  listingCategory ListingCategory[]
+  menuCategory    MenuCategory[]
+
+  @@index([merchantId], map: "Category_merchantId_fkey")
 }
 
-model AttributeValue {
-  id               String             @id @default(cuid())
-  attributeId      String
-  value            String
-  Attribute        Attribute          @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-  VariantAttribute VariantAttribute[]
-
-  @@index([attributeId], map: "AttributeValue_attributeId_fkey")
-}
-
-model HierachyLevel {
-  id           String         @id @default(cuid())
+model Menu {
+  id           String         @id
+  merchantId   String
   name         String
-  level        Int
-  HierachyNode HierachyNode[]
+  merchant     Merchant       @relation(fields: [merchantId], references: [id])
+  menuCategory MenuCategory[]
+
+  @@index([merchantId], map: "Menu_merchantId_fkey")
 }
 
-model HierachyNode {
-  id                                                         String              @id @default(cuid())
-  name                                                       String
-  hierachyLevelId                                            String
-  HierachyLevel                                              HierachyLevel       @relation(fields: [hierachyLevelId], references: [id])
-  HierachyStructure_HierachyStructure_childIdToHierachyNode  HierachyStructure[] @relation("HierachyStructure_childIdToHierachyNode")
-  HierachyStructure_HierachyStructure_parentIdToHierachyNode HierachyStructure[] @relation("HierachyStructure_parentIdToHierachyNode")
+model MenuCategory {
+  menuId     String
+  categoryId String
+  rank       Int      @default(0)
+  category   Category @relation(fields: [categoryId], references: [id])
+  menu       Menu     @relation(fields: [menuId], references: [id])
 
-  @@index([hierachyLevelId], map: "HierachyNode_hierachyLevelId_fkey")
+  @@id([menuId, categoryId])
+  @@index([categoryId], map: "MenuCategory_categoryId_fkey")
 }
 
-model HierachyStructure {
-  parentId                                              String
-  childId                                               String
-  HierachyNode_HierachyStructure_childIdToHierachyNode  HierachyNode @relation("HierachyStructure_childIdToHierachyNode", fields: [childId], references: [id])
-  HierachyNode_HierachyStructure_parentIdToHierachyNode HierachyNode @relation("HierachyStructure_parentIdToHierachyNode", fields: [parentId], references: [id])
+model Listing {
+  id                  String               @id
+  merchantId          String
+  name                String
+  description         String
+  priceInCents        Int
+  published           Boolean              @default(false)
+  Merchant            Merchant             @relation(fields: [merchantId], references: [id])
+  ListingCategory     ListingCategory[]
+  listingFilterValues ListingFilterValue[]
+  ListingVariant      ListingVariant[]
 
-  @@id([parentId, childId])
-  @@index([childId], map: "HierachyStructure_childId_fkey")
+  @@index([merchantId], map: "Listing_merchantId_fkey")
 }
 
-model Product {
-  id      String    @id
-  name    String
-  Variant Variant[]
+model ListingCategory {
+  listingId  String
+  categoryId String
+  rank       Int      @default(0)
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  Listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([listingId, categoryId])
+  @@index([categoryId], map: "ListingCategory_categoryId_fkey")
 }
 
-model Variant {
-  id               String             @id
-  productId        String
-  Product          Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
-  VariantAttribute VariantAttribute[]
+model Filter {
+  id         String        @id
+  filterId   String
+  merchantId String
+  name       String
+  merchant   Merchant      @relation(fields: [merchantId], references: [id])
+  values     FilterValue[]
 
-  @@index([productId], map: "Variant_productId_fkey")
+  @@index([merchantId], map: "Filter_merchantId_fkey")
 }
 
-model VariantAttribute {
-  variantId        String
-  attributeId      String
-  attributeValueId String
-  Attribute        Attribute      @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-  AttributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
-  Variant          Variant        @relation(fields: [variantId], references: [id], onDelete: Cascade)
+model FilterValue {
+  id                  String               @id
+  filterId            String
+  value               String
+  filter              Filter               @relation(fields: [filterId], references: [id])
+  listingFilterValues ListingFilterValue[]
 
-  @@id([variantId, attributeId])
-  @@index([attributeId], map: "VariantAttribute_attributeId_fkey")
-  @@index([attributeValueId], map: "VariantAttribute_attributeValueId_fkey")
+  @@index([filterId], map: "FilterValue_filterId_fkey")
+}
+
+model ListingVariant {
+  id        String  @id
+  listingId String
+  name      String
+  isDefault Boolean
+  Listing   Listing @relation(fields: [listingId], references: [id])
+
+  @@index([listingId], map: "ListingVariant_listingId_fkey")
+}
+
+model ListingFilterValue {
+  listingId     String
+  filterValueId String
+  filterValue   FilterValue @relation(fields: [filterValueId], references: [id])
+  listing       Listing     @relation(fields: [listingId], references: [id])
+
+  @@id([listingId, filterValueId])
+  @@index([filterValueId], map: "ListingFilterValue_filterValueId_fkey")
 }

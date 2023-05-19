@@ -1,3 +1,4 @@
+import Steps from "@/components/steps";
 import mutations from "@/frontend/utils/mutations";
 import queries from "@/frontend/utils/queries";
 import { studentFormSchema } from "@/frontend/utils/validation";
@@ -11,7 +12,6 @@ import {
   Flex,
   Grid,
   MediaQuery,
-  Modal,
   Select,
   Stack,
   Text,
@@ -24,7 +24,6 @@ import { IconTrash } from "@tabler/icons-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
-import Steps from "../../components/steps";
 
 type StudentForm = Omit<Student, "id" | "sessionId">;
 

@@ -1,3 +1,4 @@
+import Money from "@/components/money";
 import PageHeader from "@/components/page-header";
 import queries from "@/frontend/utils/queries";
 import {
@@ -10,6 +11,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
@@ -36,9 +38,13 @@ const ViewOrderPage = () => {
   const [pageState, setPageState] = useState<PageState>("capture");
   const [orderNumber, setOrderNumber] = useState("");
 
-  const fetchOrderQuery = useQuery("order", fetchOrder, {
-    enabled: orderNumber.length > 0,
-  });
+  const fetchOrderQuery = useQuery(
+    ["order", orderNumber],
+    () => fetchOrder(orderNumber),
+    {
+      enabled: orderNumber.length > 0,
+    }
+  );
 
   const form = useForm({
     initialValues: {
@@ -47,7 +53,12 @@ const ViewOrderPage = () => {
   });
 
   useEffect(() => {
-    if (router.query.reference === undefined) return;
+    if (router.query.reference === undefined) {
+      form.reset();
+      setOrderNumber("");
+      return;
+    }
+
     setOrderNumber(router.query.reference as string);
   }, [router.query.reference]);
 
@@ -65,6 +76,32 @@ const ViewOrderPage = () => {
   const onFormSubmit = ({ orderNumber }: { orderNumber: string }) => {
     router.push("/view-order?reference=" + orderNumber);
   };
+
+  const orderItems = fetchOrderQuery.data?.orderItems || [];
+  const listings = fetchOrderQuery.data?.orderItemListings || [];
+
+  const tableData = orderItems.map((orderItem: any) => {
+    const product = listings.find((e: any) => e.id === orderItem.productId);
+    const { studentFirstName, studentLastName, studentGrade, menuId, dateId } =
+      orderItem.batch;
+
+    const studentName = `${studentFirstName} ${studentLastName}`;
+
+    return (
+      <tr key={orderItem.id}>
+        <td>{studentName}</td>
+        <td>{product.name}</td>
+        <td>{dateId}</td>
+        <td>{menuId}</td>
+        <td>{orderItem.quantity}</td>
+        <td>
+          <Money currency="ZAR">
+            {orderItem.pricePerItemInCents * orderItem.quantity}
+          </Money>
+        </td>
+      </tr>
+    );
+  });
 
   return (
     <AppShell>
@@ -90,6 +127,15 @@ const ViewOrderPage = () => {
         )}
         {pageState === "result" && (
           <div style={{ width: "1000px" }}>
+            <Button
+              href="/view-order"
+              component={Link}
+              variant="default"
+              size="xs"
+              mb="sm"
+            >
+              Search for a different order
+            </Button>
             <Table withBorder>
               <thead>
                 <tr>
@@ -101,6 +147,7 @@ const ViewOrderPage = () => {
                   <th>Cost</th>
                 </tr>
               </thead>
+              <tbody>{tableData}</tbody>
             </Table>
           </div>
         )}

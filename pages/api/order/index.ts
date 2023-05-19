@@ -1,19 +1,43 @@
-import products from "@/backend/data/products";
 import dbInstance from "@/backend/db";
+import { sendOrderConfirmationMail } from "@/backend/services/email";
 import getBasketSummary from "@/backend/services/get-basket-summary";
 import generateOrderId from "@/backend/utility/generate-order-id";
 import getMerchantId from "@/backend/utility/get-merchant-id";
 import HttpException from "@/backend/utility/http-exception";
 import { RouteHandler } from "@/backend/utility/route-handler";
-import { Order, OrderBatch, OrderItem } from "@prisma/client";
+import { OrderBatch, OrderItem } from "@prisma/client";
 import { captureException } from "@sentry/nextjs";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { getCookie, setCookie } from "cookies-next";
+import { DateTime } from "luxon";
 
 export default RouteHandler({
   async GET(req, res) {
-    const orderId = req.query.order as string;
-    res.send(generateOrderId());
+    const orderId = req.query.reference as string;
+
+    const orderItems = await dbInstance.orderItem.findMany({
+      where: {
+        orderId: orderId,
+      },
+      include: {
+        batch: true,
+      },
+    });
+
+    const productIdList = orderItems.map((e) => e.productId);
+
+    const orderItemListings = await dbInstance.listing.findMany({
+      where: {
+        id: {
+          in: productIdList,
+        },
+      },
+    });
+
+    res.send({
+      orderItems,
+      orderItemListings,
+    });
   },
   async POST(req, res) {
     const sessionId = getCookie("session", { req, res })?.toString()!;
@@ -27,7 +51,7 @@ export default RouteHandler({
 
     paymentMethod.configuration = JSON.parse(paymentMethod.configuration);
 
-    const basketSummary = await getBasketSummary(sessionId, products);
+    const basketSummary = await getBasketSummary(sessionId);
 
     // Make Payment
     const payment = await tryMakePayment({
@@ -39,11 +63,10 @@ export default RouteHandler({
     if (!payment.success) {
       throw new HttpException(
         {
-          data: null,
+          data: payment.response,
           success: false,
-          messages: ["Failed to make payment"],
         },
-        424
+        HttpStatusCode.FailedDependency
       );
     }
 
@@ -60,7 +83,18 @@ export default RouteHandler({
       },
     });
 
-    console.log("Basket Items");
+    const variantIdList = basketItems.map((e) => e.variantId);
+
+    const variantsWithListing = await dbInstance.listingVariant.findMany({
+      where: {
+        id: {
+          in: variantIdList,
+        },
+      },
+      include: {
+        Listing: true,
+      },
+    });
 
     basketItems.forEach((basketItem) => {
       let batch = orderBatches.find((e) => {
@@ -86,22 +120,17 @@ export default RouteHandler({
         batch = orderBatches[orderBatches.length - 1];
       }
 
-      console.log(batch);
-
-      const product = products.find(
-        (product) => product.id === basketItem.productId
+      const variant = variantsWithListing.find(
+        (variant) => variant.id === basketItem.variantId
       )!;
 
-      console.log(product);
-
       batch.items!.push({
-        pricePerItemInCents: product.priceInCents,
+        pricePerItemInCents: variant.Listing.priceInCents,
         productId: basketItem.productId,
         quantity: basketItem.quantity,
+        variantId: basketItem.variantId,
       });
     });
-
-    console.log("Creating Order");
 
     const orderData = {
       id: generateOrderId(),
@@ -117,14 +146,13 @@ export default RouteHandler({
       customerEmail: req.body.email,
       customerFirstName: req.body.firstName,
       customerLastName: req.body.lastName,
+      notes: req.body.notes,
     };
 
     // Construct Order
     const order = await dbInstance.order.create({
       data: orderData,
     });
-
-    console.log("Order created");
 
     for await (const batch of orderBatches) {
       const newBatch = await dbInstance.orderBatch.create({
@@ -143,35 +171,100 @@ export default RouteHandler({
           orderBatchId: newBatch.id,
           orderId: order.id,
           productId: bi.productId!,
+          variantId: bi.variantId!,
           pricePerItemInCents: bi.pricePerItemInCents!,
           quantity: bi.quantity!,
         })),
       });
     }
 
-    console.log("Batches created");
+    const orderDateTime = DateTime.fromJSDate(
+      orderData.createdAt
+    ).toLocaleString({
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    });
+
+    const currencyFormatter = Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "ZAR",
+      currencyDisplay: "narrowSymbol",
+    });
+
+    const formatCurrency = (valueInCents: number) => {
+      const valueInFull = parseFloat((valueInCents / 100).toFixed(2));
+      return currencyFormatter.format(valueInFull);
+    };
+
+    const viewOrderUrl =
+      process.env.NODE_ENV === "development"
+        ? `http://${merchantId}.localhost:3000/view-order?reference=${order.id}`
+        : `https://${merchantId}.turbocart.co.za/view-order?reference=${order.id}`;
+
+    // Send confirmation mail
+    await sendOrderConfirmationMail(orderData.customerEmail, {
+      orderId: order.id,
+      orderDateTime,
+      totals: {
+        serviceFee: formatCurrency(order.serviceFeeInCents),
+        subtotal: formatCurrency(order.totalInCents - order.serviceFeeInCents),
+        total: formatCurrency(order.totalInCents),
+      },
+      items: basketSummary.items.map((e) => ({
+        name: e.variant.name,
+        price: formatCurrency(e.totalInCents),
+        quantity: e.quantity,
+      })),
+      links: {
+        order: viewOrderUrl,
+      },
+    });
+
+    await triggerOrderPlacedWebhook(order.id);
 
     // Cleanup session
+    const rememberDetails = req.body.rememberDetails as boolean;
+
+    const currentSessionStudents = await dbInstance.student.findMany({
+      where: {
+        sessionId,
+      },
+    });
+
     await dbInstance.session.delete({
       where: {
         id: sessionId,
       },
     });
 
-    console.log("Session deleted");
-
     const newSession = await dbInstance.session.create({
       data: {
         createdAt: new Date(),
         merchantId: merchantId,
+        customerFirstName: rememberDetails ? orderData.customerFirstName : "",
+        customerLastName: rememberDetails ? orderData.customerLastName : "",
+        customerEmail: rememberDetails ? orderData.customerEmail : "",
+        rememberDetails: rememberDetails,
       },
     });
 
+    if (rememberDetails) {
+      await dbInstance.student.createMany({
+        data: currentSessionStudents.map((student) => ({
+          sessionId: newSession.id,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          grade: student.grade,
+        })),
+      });
+    }
+
     setCookie("session", newSession.id, { req, res });
 
-    console.log("Session created");
-
-    res.status(201).send("Order successfully created!");
+    res.status(201).send(order);
   },
 });
 
@@ -205,15 +298,28 @@ const tryMakePayment = async (data: {
       success: true,
       response: paymentResponse.data,
     };
-  } catch (err) {
+  } catch (err: any) {
     await captureException({
       message: "Failed to make payment",
-      error: err,
+      error: err.response.data,
     });
 
     return {
       success: false,
-      response: null,
+      response: err.response.data,
     };
   }
 };
+
+async function triggerOrderPlacedWebhook(orderId: string) {
+  try {
+    await axios.post(process.env.WEBHOOK_URL as string, {
+      type: "order.created",
+      data: {
+        orderId: orderId,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}

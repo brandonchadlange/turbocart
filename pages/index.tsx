@@ -1,90 +1,27 @@
 import dbInstance from "@/backend/db";
 import getMerchantId from "@/backend/utility/get-merchant-id";
-import {
-  AppShell,
-  BackgroundImage,
-  Button,
-  Card,
-  Flex,
-  Header,
-  Image,
-  Overlay,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { useStrategyState } from "@/frontend/providers/strategy";
+import moduleMakerMap from "@/strategies";
 import { getCookie, setCookie } from "cookies-next";
 import { GetServerSideProps } from "next";
-import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function Home() {
-  return (
-    // <AppShell padding={0}>
-    //   <BackgroundImage src="banner.jpg" h="100vh">
-    //     <Overlay>
-    //       <Stack align="stretch" justify="center" h="100%" w="100%" px={60}>
-    //         <Flex justify="end">
-    //           <Flex gap="md">
-    //             <Button color="yellow" variant="outline" radius="xl">
-    //               View order
-    //             </Button>
-    //           </Flex>
-    //         </Flex>
-    //         <Card w={1000} bg="transparent" p={0}>
-    //           <Title color="white" size={80} style={{ lineHeight: "62px" }}>
-    //             Kids Lunch? <br />
-    //             <Text color="yellow">Sorted!</Text>
-    //           </Title>
-    //           <Text size={40} color="white" mt="lg" maw={500}>
-    //             Order your childrens meals up to two weeks in advance!
-    //           </Text>
-    //           <Flex gap="md" mt={40}>
-    //             <Button
-    //               component={Link}
-    //               href="/students"
-    //               w={180}
-    //               radius="xl"
-    //               color="yellow"
-    //               style={{ color: "black" }}
-    //               size="lg"
-    //             >
-    //               Place order
-    //             </Button>
-    //           </Flex>
-    //         </Card>
-    //       </Stack>
-    //     </Overlay>
-    //   </BackgroundImage>
-    // </AppShell>
-    <AppShell padding={0}>
-      <BackgroundImage src="banner.jpg" h="100vh">
-        <Overlay>
-          <Stack align="stretch" justify="center" h="100%" w="100%" px={30}>
-            <Title color="white" size={50} style={{ lineHeight: "62px" }}>
-              Kids Lunch? <br />
-              <Text color="yellow">Sorted!</Text>
-            </Title>
-            <Text size={30} weight="bold" color="white" mt="lg" maw={500}>
-              Order your childrens meals up to a week in advance!
-            </Text>
-            <Flex gap="md" mt={40}>
-              <Button
-                component={Link}
-                href="/students"
-                w={180}
-                radius="xl"
-                color="yellow"
-                style={{ color: "black" }}
-                size="lg"
-              >
-                Place order
-              </Button>
-            </Flex>
-          </Stack>
-        </Overlay>
-      </BackgroundImage>
-    </AppShell>
+  const { strategy } = useStrategyState();
+  const router = useRouter();
+  const currentPath = router.asPath;
+
+  const currentPage = strategy.pages.find(
+    (e) => e.path.toLowerCase() === currentPath.toLowerCase()
   );
+
+  if (!currentPage) {
+    return <></>;
+  }
+
+  const PageComponent = currentPage!.component;
+
+  return <PageComponent />;
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {

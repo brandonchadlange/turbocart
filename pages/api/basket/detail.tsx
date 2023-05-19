@@ -1,8 +1,6 @@
 import dbInstance from "@/backend/db";
 import { RouteHandler } from "@/backend/utility/route-handler";
 import { getCookie } from "cookies-next";
-import products from "@/backend/data/products";
-import menus from "@/backend/data/menu";
 
 export default RouteHandler({
   async GET(req, res) {
@@ -22,8 +20,23 @@ export default RouteHandler({
       },
     });
 
+    const variantIdList = basketItems.map((e) => e.variantId);
+
+    const variants = await dbInstance.listingVariant.findMany({
+      where: {
+        id: {
+          in: variantIdList,
+        },
+      },
+      include: {
+        Listing: true,
+      },
+    });
+
+    const menus = await dbInstance.menu.findMany();
+
     basketItems.forEach((item: any) => {
-      item.product = products.find((product) => product.id === item.productId)!;
+      item.variant = variants.find((variant) => variant.id === item.variantId)!;
       item.menu = menus.find((menu) => menu.id === item.menuId);
     });
 
