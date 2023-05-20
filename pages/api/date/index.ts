@@ -31,7 +31,7 @@ export default RouteHandler({
         dateCode: dayToAdd.toFormat("yyyy-MM-dd"),
         weekDay: dayToAdd.weekdayShort,
         day: dayToAdd.day,
-        status: status,
+        status: "future",
       });
     }
 
