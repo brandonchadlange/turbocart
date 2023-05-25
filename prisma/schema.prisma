@@ -207,7 +207,7 @@ model FilterValue {
 }
 
 model ListingVariant {
-  id        String  @id
+  id        String  @id @default(cuid())
   listingId String
   name      String
   isDefault Boolean
