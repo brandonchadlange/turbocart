@@ -9,8 +9,9 @@ export default RouteHandler({
     const response: any[] = [];
     let now = DateTime.now().setLocale("en-ZA");
     let weekDayNumber = now.weekday;
+
     let startOfWeek =
-      weekDayNumber === 7 ? now : now.minus({ days: weekDayNumber });
+      weekDayNumber >= 6 ? now : now.minus({ days: weekDayNumber });
 
     const inCurrentHour = now.hour === TMP_TIME_HOUR_FILTER;
     const hourExceeded = now.hour > TMP_TIME_HOUR_FILTER;
@@ -21,6 +22,32 @@ export default RouteHandler({
     for (var i = 0; i < 5; i++) {
       const dayToAdd = startOfWeek.plus({ days: i + 1 });
       let status = "complete";
+
+      if (weekDayNumber >= 6 && dayToAdd.weekday === 1) {
+        response.push({
+          date: dayToAdd.toFormat("LLL dd"),
+          weekNumber: dayToAdd.weekNumber,
+          dateCode: dayToAdd.toFormat("yyyy-MM-dd"),
+          weekDay: dayToAdd.weekdayShort,
+          day: dayToAdd.day,
+          status: "today",
+        });
+
+        continue;
+      }
+
+      if (weekDayNumber >= 6 && dayToAdd.weekday !== 1) {
+        response.push({
+          date: dayToAdd.toFormat("LLL dd"),
+          weekNumber: dayToAdd.weekNumber,
+          dateCode: dayToAdd.toFormat("yyyy-MM-dd"),
+          weekDay: dayToAdd.weekdayShort,
+          day: dayToAdd.day,
+          status: "future",
+        });
+
+        continue;
+      }
 
       if (now.weekday - dayToAdd.weekday === 0) {
         status = periodExceeded ? "complete" : "today";
