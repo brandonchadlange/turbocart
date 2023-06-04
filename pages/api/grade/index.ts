@@ -10,6 +10,7 @@ export default RouteHandler({
         "RM",
         "1E",
         "1C",
+        "1S",
         "2D",
         "2DT",
         "3W",
