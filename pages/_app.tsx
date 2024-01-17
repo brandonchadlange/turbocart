@@ -26,8 +26,8 @@ export default function App({ Component, pageProps }: AppProps) {
           }}
         >
           <Notifications position="top-left" />
-          <OrdersDisabled />
-          {/* <Component {...pageProps} /> */}
+          {/* <OrdersDisabled /> */}
+          <Component {...pageProps} />
         </MantineProvider>
       </StrategyStateProvider>
     </QueryClientProvider>
