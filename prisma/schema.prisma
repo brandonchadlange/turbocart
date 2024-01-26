@@ -13,11 +13,14 @@ model Merchant {
   clerkId        String          @default("")
   strategy       String          @default("")
   Category       Category[]
+  File           File[]
   Filter         Filter[]
   Listing        Listing[]
   Menu           Menu[]
   orders         Order[]
+  Page           Page[]
   paymentMethods PaymentMethod[]
+  Template       Template[]
 }
 
 model PaymentMethod {
@@ -131,6 +134,8 @@ model Category {
   id              String            @id @default(cuid())
   merchantId      String
   name            String
+  rank            Int               @default(0)
+  bannerImageUrl  String            @default("")
   Merchant        Merchant          @relation(fields: [merchantId], references: [id])
   listingCategory ListingCategory[]
   menuCategory    MenuCategory[]
@@ -160,16 +165,19 @@ model MenuCategory {
 }
 
 model Listing {
-  id                  String               @id
-  merchantId          String
-  name                String
-  description         String
-  priceInCents        Int
-  published           Boolean              @default(false)
-  Merchant            Merchant             @relation(fields: [merchantId], references: [id])
-  ListingCategory     ListingCategory[]
-  listingFilterValues ListingFilterValue[]
-  ListingVariant      ListingVariant[]
+  id                     String               @id
+  merchantId             String
+  name                   String
+  description            String
+  priceInCents           Int
+  published              Boolean              @default(false)
+  isStockTrackingEnabled Boolean              @default(false)
+  slug                   String               @default("")
+  defaultImageUrl        String               @default("")
+  Merchant               Merchant             @relation(fields: [merchantId], references: [id])
+  ListingCategory        ListingCategory[]
+  listingFilterValues    ListingFilterValue[]
+  ListingVariant         ListingVariant[]
 
   @@index([merchantId], map: "Listing_merchantId_fkey")
 }
@@ -207,11 +215,15 @@ model FilterValue {
 }
 
 model ListingVariant {
-  id        String  @id @default(cuid())
-  listingId String
-  name      String
-  isDefault Boolean
-  Listing   Listing @relation(fields: [listingId], references: [id])
+  id                   String  @id @default(cuid())
+  listingId            String
+  name                 String
+  isDefault            Boolean
+  additionalFeeInCents Int     @default(0)
+  position             Int     @default(-1)
+  amountInStock        Int     @default(0)
+  isOutOfStock         Boolean @default(false)
+  Listing              Listing @relation(fields: [listingId], references: [id])
 
   @@index([listingId], map: "ListingVariant_listingId_fkey")
 }
@@ -224,4 +236,58 @@ model ListingFilterValue {
 
   @@id([listingId, filterValueId])
   @@index([filterValueId], map: "ListingFilterValue_filterValueId_fkey")
+}
+
+model File {
+  id             String   @id
+  merchantId     String
+  componentId    String
+  type           String
+  name           String
+  htmlString     String   @db.LongText
+  cssString      String   @db.LongText
+  htmlJsonString String   @db.LongText
+  Merchant       Merchant @relation(fields: [merchantId], references: [id])
+
+  @@index([merchantId], map: "File_merchantId_fkey")
+}
+
+model Page {
+  id            String          @id
+  merchantId    String
+  name          String
+  path          String
+  layoutId      String
+  Template      Template        @relation(fields: [layoutId], references: [id])
+  Merchant      Merchant        @relation(fields: [merchantId], references: [id])
+  PageComponent PageComponent[]
+
+  @@index([layoutId], map: "Page_layoutId_fkey")
+  @@index([merchantId], map: "Page_merchantId_fkey")
+}
+
+model PageComponent {
+  id                      String @id
+  pageId                  String
+  rank                    Int
+  componentKey            String
+  configurationJsonString String
+  Page                    Page   @relation(fields: [pageId], references: [id])
+
+  @@index([pageId], map: "PageComponent_pageId_fkey")
+}
+
+model Template {
+  id             String   @id
+  merchantId     String
+  componentId    String
+  type           String
+  name           String
+  htmlString     String   @db.LongText
+  cssString      String   @db.LongText
+  htmlJsonString String   @db.LongText
+  Page           Page[]
+  Merchant       Merchant @relation(fields: [merchantId], references: [id])
+
+  @@index([merchantId], map: "Template_merchantId_fkey")
 }
