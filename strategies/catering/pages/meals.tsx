@@ -7,6 +7,7 @@ import {
   ActionIcon,
   Affix,
   AppShell,
+  Badge,
   Button,
   Card,
   Container,
@@ -142,7 +143,18 @@ const BasketForm = (props: BasketFormProps) => {
                 <Radio
                   key={variant.id}
                   value={variant.id}
-                  label={variant.name}
+                  label={
+                    <table style={{ width: "100%" }}>
+                      <tr>
+                        <td>{variant.name}</td>
+                        <td>
+                          <Badge size="sm" radius="sm">
+                            + R{variant.additionalFeeInCents / 100}
+                          </Badge>
+                        </td>
+                      </tr>
+                    </table>
+                  }
                 />
               ))}
             </Group>
@@ -349,7 +361,12 @@ const MealsPage = () => {
                     <td>{item.dateId}</td>
                     <td>{item.menu.name}</td>
                     <td>{item.quantity}</td>
-                    <td>R{item.variant.Listing.priceInCents / 100}</td>
+                    <td>
+                      R
+                      {(item.variant.Listing.priceInCents +
+                        item.variant.additionalFeeInCents) /
+                        100}
+                    </td>
                     <td>
                       <ActionIcon onClick={() => removeItemFromBasket(item.id)}>
                         <IconTrash />
