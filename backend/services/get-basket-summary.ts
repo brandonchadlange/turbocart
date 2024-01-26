@@ -54,20 +54,25 @@ class BasketSummaryResponse {
         (variant) => variant.id === basketItem.variantId
       );
 
-      this.totalInCents += basketItem.quantity * variant!.Listing!.priceInCents;
+      this.totalInCents +=
+        basketItem.quantity *
+        (variant!.Listing!.priceInCents + variant!.additionalFeeInCents);
       this.totalItems += basketItem.quantity;
 
       if (summaryItem !== undefined) {
         summaryItem.quantity += basketItem.quantity;
         summaryItem.totalInCents +=
-          basketItem.quantity * variant!.Listing!.priceInCents;
+          basketItem.quantity *
+          (variant!.Listing!.priceInCents + variant!.additionalFeeInCents);
         return;
       }
 
       this.items.push({
         variant: variant!,
         quantity: basketItem.quantity,
-        totalInCents: basketItem.quantity * variant!.Listing!.priceInCents,
+        totalInCents:
+          basketItem.quantity *
+          (variant!.Listing!.priceInCents + variant!.additionalFeeInCents),
       });
     });
   }
