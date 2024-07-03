@@ -14,6 +14,7 @@ export default RouteHandler({
     const variants = await dbInstance.listingVariant.findMany({
       where: {
         listingId,
+        deleted: false,
       },
     });
 

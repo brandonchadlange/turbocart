@@ -114,8 +114,8 @@ model OrderItem {
   batch               OrderBatch @relation(fields: [orderBatchId], references: [id])
   order               Order      @relation(fields: [orderId], references: [id])
 
-  @@index([orderId], map: "OrderItem_orderId_fkey")
   @@index([orderBatchId], map: "OrderItem_orderBatchId_fkey")
+  @@index([orderId], map: "OrderItem_orderId_fkey")
 }
 
 model Student {
@@ -223,6 +223,7 @@ model ListingVariant {
   position             Int     @default(-1)
   amountInStock        Int     @default(0)
   isOutOfStock         Boolean @default(false)
+  deleted              Boolean @default(false)
   Listing              Listing @relation(fields: [listingId], references: [id])
 
   @@index([listingId], map: "ListingVariant_listingId_fkey")
