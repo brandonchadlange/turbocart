@@ -4,6 +4,7 @@ import queries from "@/frontend/utils/queries";
 import { userDetailsSchema } from "@/frontend/utils/validation";
 import makePaymentWithYoco from "@/payment-providers/yoco";
 import {
+  ActionIcon,
   AppShell,
   Button,
   Card,
@@ -23,6 +24,7 @@ import {
 } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
+import { IconTrash } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
@@ -68,7 +70,7 @@ const ConfirmationPage = () => {
     fetchPaymentMethodConfig,
     fetchCanOrder,
   } = queries;
-  const { placeOrder } = mutations;
+  const { placeOrder, removeFromBasket } = mutations;
 
   const basketSummaryQuery = useQuery("basket-summary", fetchBasketSummary);
   const basketDetailQuery = useQuery("basket-detail", fetchBasketDetail);
@@ -187,6 +189,12 @@ const ConfirmationPage = () => {
     }
   };
 
+  const removeItemFromBasket = async (basketItemId: string) => {
+    await removeFromBasket(basketItemId);
+    basketSummaryQuery.refetch();
+    basketDetailQuery.refetch();
+  };
+
   return (
     <AppShell>
       <Container mx="auto" p={0} pb={60}>
@@ -295,6 +303,7 @@ const ConfirmationPage = () => {
                         <th>Period</th>
                         <th>Quantity</th>
                         <th>Cost</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -306,6 +315,13 @@ const ConfirmationPage = () => {
                           <td>{item.menu.name}</td>
                           <td>{item.quantity}</td>
                           <td>R{item.variant.Listing.priceInCents / 100}</td>
+                          <td>
+                            <ActionIcon
+                              onClick={() => removeItemFromBasket(item.id)}
+                            >
+                              <IconTrash />
+                            </ActionIcon>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
