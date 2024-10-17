@@ -46,6 +46,9 @@ const queries = {
     applyFetch<any>("/api/payment-method/" + paymentMethodId)(),
   fetchFilterValues: (filterId: string) =>
     applyFetch<FilterValue[]>("/api/filter-value?filterId=" + filterId)(),
+  fetchCanOrder: applyFetch<{ canOrder: boolean; items: any[] }>(
+    "/api/can-order"
+  ),
 };
 
 export default queries;

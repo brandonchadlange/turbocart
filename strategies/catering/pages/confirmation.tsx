@@ -66,6 +66,7 @@ const ConfirmationPage = () => {
     fetchBasketDetail,
     fetchPaymentMethods,
     fetchPaymentMethodConfig,
+    fetchCanOrder,
   } = queries;
   const { placeOrder } = mutations;
 
@@ -155,6 +156,18 @@ const ConfirmationPage = () => {
   };
 
   const onFormSubmit = async (data: any) => {
+    const { canOrder, items } = await fetchCanOrder();
+
+    if (!canOrder) {
+      notifications.show({
+        title: "Failed to place order!",
+        message: `There are ${items} item(s) in your basket which surpass our order cutoff time of 07:30. Please remove these items and try again.`,
+        color: "red",
+      });
+
+      return;
+    }
+
     await attachYocoScript();
 
     try {
