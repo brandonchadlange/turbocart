@@ -161,8 +161,9 @@ const ConfirmationPage = () => {
     if (!canOrder) {
       notifications.show({
         title: "Failed to place order!",
-        message: `There are ${items} item(s) in your basket which surpass our order cutoff time of 07:30. Please remove these items and try again.`,
+        message: `There are ${items.length} item(s) in your basket for today which surpass our order cutoff time of 07:30. Please remove these items and try again.`,
         color: "red",
+        autoClose: 15000,
       });
 
       return;
