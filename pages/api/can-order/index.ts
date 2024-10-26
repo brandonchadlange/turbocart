@@ -20,8 +20,10 @@ export default RouteHandler({
     const itemsForToday = basketItems.filter((e) => e.dateId === nowDateId);
 
     if (
-      (itemsForToday.length > 0 && now.hour > TMP_TIME_HOUR_FILTER) ||
-      (now.hour === TMP_TIME_HOUR_FILTER && now.minute > TMP_TIME_MINUTE_FILTER)
+      itemsForToday.length > 0 &&
+      (now.hour > TMP_TIME_HOUR_FILTER ||
+        (now.hour === TMP_TIME_HOUR_FILTER &&
+          now.minute > TMP_TIME_MINUTE_FILTER))
     ) {
       res.status(200).send({ canOrder: false, items: itemsForToday });
       return;
