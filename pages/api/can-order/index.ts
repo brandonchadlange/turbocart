@@ -29,6 +29,6 @@ export default RouteHandler({
       return;
     }
 
-    res.status(200).send({ canOrder: true, items: itemsForToday });
+    res.status(200).send({ canOrder: true, items: itemsForToday, minute: now.minute, hour: now.hour, });
   },
 });
