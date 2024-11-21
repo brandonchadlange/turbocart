@@ -14,7 +14,7 @@ export default RouteHandler({
       },
     });
 
-    const now = DateTime.now();
+    const now = DateTime.now().setZone('Africa/Johannesburg');
     const nowDateId = now.toFormat("yyyy-LL-dd");
 
     const itemsForToday = basketItems.filter((e) => e.dateId === nowDateId);
