@@ -4,6 +4,7 @@ import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { StrategyStateProvider } from "@/frontend/providers/strategy";
+import { OrdersDisabled } from "@/components/orders-disabled";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,8 +26,8 @@ export default function App({ Component, pageProps }: AppProps) {
           }}
         >
           <Notifications position="top-left" />
-          {/* <OrdersDisabled /> */}
-          <Component {...pageProps} />
+          <OrdersDisabled />
+          {/* <Component {...pageProps} /> */}
         </MantineProvider>
       </StrategyStateProvider>
     </QueryClientProvider>
