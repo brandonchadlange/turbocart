@@ -13,8 +13,10 @@ import {
   Divider,
   Flex,
   Grid,
+  List,
   LoadingOverlay,
   MediaQuery,
+  Space,
   Stack,
   Table,
   Text,
@@ -48,6 +50,7 @@ type UserDetailsForm = {
 
 const ConfirmationPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState<any>();
   const router = useRouter();
 
@@ -235,9 +238,39 @@ const ConfirmationPage = () => {
                           type: "checkbox",
                         })}
                       />
-                      {/* <Tooltip label=""></Tooltip> */}
                     </Flex>
-                    <Button type="submit" color="yellow">
+                    <Flex>
+                      <Checkbox
+                        my="sm"
+                        label="I accept the terms & conditons"
+                        description={
+                          <>
+                            <Text size="xs" color="black">
+                              By checking this I agree to the following:
+                            </Text>
+
+                            <List size="xs">
+                              <List.Item>
+                                We reserve the right to substitute products
+                              </List.Item>
+                              <List.Item>
+                                Non collection for the day requested will result
+                                in a forefeit of my purchase
+                              </List.Item>
+                            </List>
+                          </>
+                        }
+                        checked={termsAccepted}
+                        onChange={(event) =>
+                          setTermsAccepted(event.currentTarget.checked)
+                        }
+                      />
+                    </Flex>
+                    <Button
+                      type="submit"
+                      color="yellow"
+                      disabled={!termsAccepted}
+                    >
                       Pay now
                     </Button>
                   </Stack>
@@ -254,7 +287,7 @@ const ConfirmationPage = () => {
                       <th style={{ textAlign: "right" }}>Total</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  {/* <tbody>
                     {basketSummary.items.map((item) => (
                       <tr key={item.variant.id}>
                         <td>{item.variant.name}</td>
@@ -264,7 +297,7 @@ const ConfirmationPage = () => {
                         </td>
                       </tr>
                     ))}
-                  </tbody>
+                  </tbody> */}
                 </Table>
                 <Divider my="xs" />
                 <Table fontSize="sm" horizontalSpacing="md">
@@ -307,7 +340,7 @@ const ConfirmationPage = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {basketDetail.map((item) => (
+                      {/* {basketDetail.map((item) => (
                         <tr key={item.id}>
                           <td>{item.student.firstName}</td>
                           <td>{item.variant.name}</td>
@@ -323,7 +356,7 @@ const ConfirmationPage = () => {
                             </ActionIcon>
                           </td>
                         </tr>
-                      ))}
+                      ))} */}
                     </tbody>
                   </Table>
                 </Card>
