@@ -287,7 +287,7 @@ const ConfirmationPage = () => {
                       <th style={{ textAlign: "right" }}>Total</th>
                     </tr>
                   </thead>
-                  {/* <tbody>
+                  <tbody>
                     {basketSummary.items.map((item) => (
                       <tr key={item.variant.id}>
                         <td>{item.variant.name}</td>
@@ -297,7 +297,7 @@ const ConfirmationPage = () => {
                         </td>
                       </tr>
                     ))}
-                  </tbody> */}
+                  </tbody>
                 </Table>
                 <Divider my="xs" />
                 <Table fontSize="sm" horizontalSpacing="md">
@@ -340,7 +340,7 @@ const ConfirmationPage = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {/* {basketDetail.map((item) => (
+                      {basketDetail.map((item) => (
                         <tr key={item.id}>
                           <td>{item.student.firstName}</td>
                           <td>{item.variant.name}</td>
@@ -356,7 +356,7 @@ const ConfirmationPage = () => {
                             </ActionIcon>
                           </td>
                         </tr>
-                      ))} */}
+                      ))}
                     </tbody>
                   </Table>
                 </Card>
