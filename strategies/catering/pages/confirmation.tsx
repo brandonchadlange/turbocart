@@ -179,7 +179,7 @@ const ConfirmationPage = () => {
     try {
       const result = await makePaymentWithYoco({
         publicKey: paymentMethod.configuration.publicKey,
-        amountInCents: basketSummary.totalInCents + 800,
+        amountInCents: basketSummary.totalInCents + 500,
       });
 
       tryPlaceOrder({
@@ -307,7 +307,7 @@ const ConfirmationPage = () => {
                         <Text>Service fee:</Text>
                       </td>
                       <td style={{ textAlign: "right" }}>
-                        <Text>R8</Text>
+                        <Text>R5</Text>
                       </td>
                     </tr>
                     <tr>
@@ -316,7 +316,7 @@ const ConfirmationPage = () => {
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <Text weight="bold">
-                          R{basketSummary.totalInCents / 100 + 8}
+                          R{basketSummary.totalInCents / 100 + 5}
                         </Text>
                       </td>
                     </tr>
