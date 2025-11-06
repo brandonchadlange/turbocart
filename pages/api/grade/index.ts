@@ -27,6 +27,7 @@ export default RouteHandler({
     res
       .status(200)
       .send([
+        "Collect Picnic",
         "Little Mount",
         "RR RR",
         "R RV",
