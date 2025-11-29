@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Sentry
 next.config.original.js
+
+# Prisma generated (old custom output)
+/backend/generated

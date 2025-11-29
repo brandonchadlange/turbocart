@@ -23,11 +23,11 @@
     "@mantine/modals": "^6.0.2",
     "@mantine/next": "^6.0.2",
     "@mantine/notifications": "^6.0.2",
-    "@prisma/client": "4.11.0",
+    "@prisma/client": "^6.0.0",
     "@sendgrid/mail": "^7.7.0",
     "@sentry/nextjs": "^7.45.0",
     "@tabler/icons-react": "^2.10.0",
-    "@types/node": "18.15.3",
+    "@types/node": "^20.0.0",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
     "aws-sdk": "^2.1360.0",
@@ -45,6 +45,6 @@
   },
   "devDependencies": {
     "@types/luxon": "^3.2.0",
-    "prisma": "^4.11.0"
+    "prisma": "^6.0.0"
   }
 }
