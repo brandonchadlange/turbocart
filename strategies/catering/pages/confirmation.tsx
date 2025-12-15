@@ -2,7 +2,6 @@ import Steps from "@/components/steps";
 import mutations from "@/frontend/utils/mutations";
 import queries from "@/frontend/utils/queries";
 import { userDetailsSchema } from "@/frontend/utils/validation";
-import makePaymentWithYoco from "@/payment-providers/yoco";
 import {
   ActionIcon,
   AppShell,
@@ -30,15 +29,6 @@ import { IconTrash } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-
-const attachYocoScript = () => {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = "https://js.yoco.com/sdk/v1/yoco-sdk-web.js";
-    script.onload = resolve;
-    document.head.append(script);
-  });
-};
 
 type UserDetailsForm = {
   firstName: string;
@@ -174,16 +164,8 @@ const ConfirmationPage = () => {
       return;
     }
 
-    await attachYocoScript();
-
     try {
-      const result = await makePaymentWithYoco({
-        publicKey: paymentMethod.configuration.publicKey,
-        amountInCents: basketSummary.totalInCents + 500,
-      });
-
       tryPlaceOrder({
-        token: result.id,
         ...data,
       });
     } catch (err: any) {

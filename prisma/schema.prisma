@@ -79,6 +79,7 @@ model Order {
   totalBatches      Int          @default(0)
   serviceFeeInCents Int          @default(0)
   isComplete        Boolean      @default(false)
+  isPaid            Boolean      @default(false)
   notes             String?
   merchant          Merchant     @relation(fields: [merchantId], references: [id])
   batches           OrderBatch[]

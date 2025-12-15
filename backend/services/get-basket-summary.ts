@@ -1,10 +1,7 @@
 import { Basket, ListingVariant } from "@prisma/client";
 import dbInstance from "../db";
 
-const getBasketSummary = async (
-  sessionId: string
-  // products: Product[]
-): Promise<BasketSummary> => {
+const getBasketSummary = async (sessionId: string): Promise<BasketSummary> => {
   const basketItems = await dbInstance.basket.findMany({
     where: {
       sessionId: sessionId,

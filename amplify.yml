@@ -7,6 +7,7 @@ frontend:
         - env | grep -e DATABASE_URL >> .env.production
         - env | grep -e WEBHOOK_URL >> .env.production
         - env | grep -e SENDGRID_API_KEY >> .env.production
+        - env | grep -e YOCO_PRIVATE_KEY >> .env.production
         - yarn install --frozen-lockfile
     build:
       commands:

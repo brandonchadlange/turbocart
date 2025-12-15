@@ -55,7 +55,7 @@ const mutations = {
   }) =>
     runMutation({
       method: "POST",
-      url: "/api/order",
+      url: "/api/checkout",
       data: {
         token: data.token,
         paymentMethodId: data.paymentMethodId,
