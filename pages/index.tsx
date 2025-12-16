@@ -42,6 +42,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
         data: {
           createdAt: new Date(),
           merchantId,
+          userAgent: req.headers["user-agent"] || "",
         },
       });
 

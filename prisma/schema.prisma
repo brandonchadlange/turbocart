@@ -44,6 +44,7 @@ model Session {
   customerFirstName String    @default("")
   customerLastName  String    @default("")
   rememberDetails   Boolean   @default(false)
+  userAgent         String    @default("")
   basket            Basket[]
   Student           Student[]
 }
