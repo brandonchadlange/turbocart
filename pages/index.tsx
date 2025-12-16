@@ -1,7 +1,7 @@
 import dbInstance from "@/backend/db";
 import getMerchantId from "@/backend/utility/get-merchant-id";
 import { useStrategyState } from "@/frontend/providers/strategy";
-import moduleMakerMap from "@/strategies";
+import { isbot } from "isbot";
 import { getCookie, setCookie } from "cookies-next";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
@@ -25,6 +25,14 @@ export default function Home() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const userAgent = req.headers["user-agent"] || "";
+
+  if (isbot(userAgent)) {
+    return {
+      props: {},
+    };
+  }
+
   const sessionId = getCookie("session", { req, res });
   const merchantId = getMerchantId(req.headers);
 
