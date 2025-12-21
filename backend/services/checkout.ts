@@ -23,7 +23,11 @@ export function getYocoApi() {
 
   return {
     createCheckout: async (request: CreateCheckoutRequest) => {
-      const successUrl = `http://cbctuckshop.localhost:3000/order-success`;
+      const merchantId = request.merchantId;
+
+      const successUrl = `https://${merchantId}.turbocart.co.za/order-success`;
+      const cancelUrl = `https://${merchantId}.turbocart.co.za/api/order-cancelled?orderId=${request.orderId}`;
+      const failureUrl = `https://${merchantId}.turbocart.co.za/api/order-failed?orderId=${request.orderId}`;
 
       try {
         const response = await yocoApi.request<CreateCheckoutResponse>({
@@ -34,6 +38,8 @@ export function getYocoApi() {
             currency: "ZAR",
             clientReferenceId: request.sessionId,
             successUrl,
+            cancelUrl,
+            failureUrl,
             metadata: {
               orderId: request.orderId,
               sessionId: request.sessionId,

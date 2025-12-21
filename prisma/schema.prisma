@@ -98,7 +98,7 @@ model OrderBatch {
   studentLastName  String
   studentGrade     String
   fulfilled        Boolean     @default(false)
-  order            Order       @relation(fields: [orderId], references: [id])
+  order            Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
   items            OrderItem[]
 
   @@index([orderId], map: "OrderBatch_orderId_fkey")
@@ -113,8 +113,8 @@ model OrderItem {
   orderBatchId        String
   packed              Boolean    @default(false)
   variantId           String
-  batch               OrderBatch @relation(fields: [orderBatchId], references: [id])
-  order               Order      @relation(fields: [orderId], references: [id])
+  batch               OrderBatch @relation(fields: [orderBatchId], references: [id], onDelete: Cascade)
+  order               Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderBatchId], map: "OrderItem_orderBatchId_fkey")
   @@index([orderId], map: "OrderItem_orderId_fkey")

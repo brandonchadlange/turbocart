@@ -31,7 +31,7 @@ export default RouteHandler({
       const yocoApi = getYocoApi();
 
       const checkoutSession = await yocoApi.createCheckout({
-        amountInCents: 5000,
+        amountInCents: order.totalInCents,
         orderId: order.id,
         sessionId: sessionId,
         merchantId: merchantId,
