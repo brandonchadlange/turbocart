@@ -165,5 +165,19 @@ async function createOrder(sessionId: string, merchantId: string, body: any) {
     });
   }
 
+  if (body.rememberDetails) {
+    await dbInstance.session.update({
+      where: {
+        id: sessionId,
+      },
+      data: {
+        customerFirstName: body.firstName,
+        customerLastName: body.lastName,
+        customerEmail: body.email,
+        rememberDetails: body.rememberDetails,
+      },
+    });
+  }
+
   return order;
 }
