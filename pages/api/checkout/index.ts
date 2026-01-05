@@ -22,7 +22,7 @@ type Transaction = Omit<
 >;
 
 export default RouteHandler({
-  async GET(req, res) {
+  async POST(req, res) {
     const sessionId = getCookie("session", { req, res })?.toString()!;
     const merchantId = getMerchantId(req.headers);
 
@@ -37,7 +37,9 @@ export default RouteHandler({
         merchantId: merchantId,
       });
 
-      res.redirect(checkoutSession.redirectUrl);
+      res.status(201).send({
+        redirectUrl: checkoutSession.redirectUrl,
+      });
     } catch (err) {
       throw new HttpException(
         {

@@ -45,8 +45,6 @@ const mutations = {
       url: "/api/basket/item/" + basketItemId,
     }),
   placeOrder: (data: {
-    token: string;
-    paymentMethodId: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -57,8 +55,6 @@ const mutations = {
       method: "POST",
       url: "/api/checkout",
       data: {
-        token: data.token,
-        paymentMethodId: data.paymentMethodId,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,

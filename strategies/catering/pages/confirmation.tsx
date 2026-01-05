@@ -59,15 +59,12 @@ const ConfirmationPage = () => {
     fetchSessionDetail,
     fetchBasketSummary,
     fetchBasketDetail,
-    fetchPaymentMethods,
-    fetchPaymentMethodConfig,
     fetchCanOrder,
   } = queries;
   const { placeOrder, removeFromBasket } = mutations;
 
   const basketSummaryQuery = useQuery("basket-summary", fetchBasketSummary);
   const basketDetailQuery = useQuery("basket-detail", fetchBasketDetail);
-  const paymentMethodsQuery = useQuery("payment-methods", fetchPaymentMethods);
 
   const basketSummary: BasketSummary = basketSummaryQuery.data || {
     totalInCents: 0,
@@ -88,67 +85,11 @@ const ConfirmationPage = () => {
     form.setFieldValue("rememberDetails", sessionDetail.rememberDetails);
   };
 
-  const fetchPaymentMethod = async (paymentMethodId: string) => {
-    const response = await fetchPaymentMethodConfig(paymentMethodId);
-    setPaymentMethod(response);
-  };
-
   useEffect(() => {
     getFormData();
   }, []);
 
-  useEffect(() => {
-    if (paymentMethodsQuery.isLoading) return;
-
-    if (paymentMethodsQuery.data!.length === 1) {
-      fetchPaymentMethod(paymentMethodsQuery.data![0].id);
-    }
-  }, [paymentMethodsQuery.isLoading]);
-
   const basketDetail = basketDetailQuery.data || [];
-
-  const tryPlaceOrder = async (data: any) => {
-    setLoading(true);
-
-    try {
-      const { id: orderId } = await placeOrder({
-        token: data.token,
-        paymentMethodId: paymentMethod.id,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        notes: data.notes,
-        rememberDetails: data.rememberDetails,
-      });
-
-      router.push("/order-success?orderId=" + orderId);
-      setLoading(false);
-    } catch (err: any) {
-      const {
-        data: { data },
-        status,
-      } = err.response;
-
-      setLoading(false);
-
-      if (status === 424) {
-        notifications.show({
-          title: "Failed to place order!",
-          message: data.displayMessage,
-          color: "red",
-          autoClose: 15000,
-        });
-
-        return;
-      }
-
-      notifications.show({
-        title: "Failed to place order!",
-        message: "An error has occured...",
-        color: "red",
-      });
-    }
-  };
 
   const onFormSubmit = async (data: any) => {
     const { canOrder, items } = await fetchCanOrder();
@@ -165,9 +106,15 @@ const ConfirmationPage = () => {
     }
 
     try {
-      tryPlaceOrder({
-        ...data,
+      const checkout = await placeOrder({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        notes: data.notes,
+        rememberDetails: data.rememberDetails,
       });
+
+      window.location.href = checkout.redirectUrl;
     } catch (err: any) {
       const errorMessage = err.message;
       alert("error occured: " + errorMessage);
