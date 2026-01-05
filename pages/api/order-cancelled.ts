@@ -14,6 +14,6 @@ export default RouteHandler({
       },
     });
 
-    res.redirect(`https://${merchantId}.turbocart.co.za/order-confirmation`);
+    res.redirect(`https://${merchantId}.turbocart.co.za/confirmation`);
   },
 });
