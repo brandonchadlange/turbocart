@@ -25,7 +25,7 @@ export function getYocoApi() {
     createCheckout: async (request: CreateCheckoutRequest) => {
       const merchantId = request.merchantId;
 
-      const successUrl = `https://${merchantId}.turbocart.co.za/order-success`;
+      const successUrl = `https://${merchantId}.turbocart.co.za/order-success?orderId=${request.orderId}`;
       const cancelUrl = `https://${merchantId}.turbocart.co.za/api/order-cancelled?orderId=${request.orderId}`;
       const failureUrl = `https://${merchantId}.turbocart.co.za/api/order-failed?orderId=${request.orderId}`;
 
