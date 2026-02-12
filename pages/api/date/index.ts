@@ -2,7 +2,7 @@ import { RouteHandler } from "@/backend/utility/route-handler";
 import { DateTime } from "luxon";
 
 export const TMP_TIME_HOUR_FILTER = 8;
-export const TMP_TIME_MINUTE_FILTER = 0;
+export const TMP_TIME_MINUTE_FILTER = 30;
 
 export default RouteHandler({
   async GET(req, res) {
